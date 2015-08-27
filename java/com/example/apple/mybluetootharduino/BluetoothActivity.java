@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.http.message.BasicNameValuePair;
@@ -33,6 +34,10 @@ import java.util.UUID;
 
 public class BluetoothActivity extends Activity {
 
+    private enum data_class{
+        temperature, force, accelerator, gyro, heartrate;
+    }
+
     Context my_context;
     private ListView text_list_view;
     private List<String> text_list = new ArrayList<String>();
@@ -40,8 +45,8 @@ public class BluetoothActivity extends Activity {
     private Button send_button;
     private Button disconnect_button;
     private EditText edit_message;
-
-
+    private TextView text_show;
+    private String urlstr = "http://59.66.138.24:5000";
     private BluetoothAdapter my_bluetooth_adapter;
     private BluetoothSocket my_bluetooth_socket;
     private BluetoothDevice my_bluetooth_device;
@@ -49,7 +54,7 @@ public class BluetoothActivity extends Activity {
     private readThread my_read;
 
     private PostThread post_thread;
-    private int threshold = 5;
+    private int threshold = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +86,7 @@ public class BluetoothActivity extends Activity {
                 /*msg = "已连接\n";
                 text_list.add(msg);
                 my_adapter.notifyDataSetChanged();*/
-                my_read = new readThread();
+                my_read = new readThread(data_class.force);
                 my_read.start();
             }
             catch (IOException connectException){
@@ -95,6 +100,12 @@ public class BluetoothActivity extends Activity {
     }
 
     protected class readThread extends Thread{
+        private data_class data_type;
+        public readThread(data_class data_){
+            super();
+            data_type = data_;
+        }
+
         @Override
         public void run() {
             byte[] buffer = new byte[1024];
@@ -107,13 +118,14 @@ public class BluetoothActivity extends Activity {
                 flag = false;
                 e.printStackTrace();
             }
-            double final_result;
             String result = new String();
+            String res = new String();
             List<BasicNameValuePair> request_list = new ArrayList<BasicNameValuePair>();
             int number = 0; //统计收到的温度个数
             while (flag) {
                 JSONObject jsonObject = new JSONObject();
                 JSONArray jsonArray = new JSONArray();
+                JSONArray force_tuple = new JSONArray();
                 try {
                     JSONObject userid = new JSONObject();
                     userid.put("userid", 1);
@@ -132,9 +144,17 @@ public class BluetoothActivity extends Activity {
                                     if (len == 0) {
                                         continue;
                                     }
-                                    result = result.substring(0, result.lastIndexOf('\r'));
-                                    final_result = new Double(result);
-                                    jsonArray.put(final_result);
+                                    switch (data_type){
+                                        case temperature:
+                                        case accelerator:
+                                        case gyro:
+                                            prepareDataDouble(result, jsonArray, force_tuple);
+                                            break;
+                                        case force:
+                                        case heartrate:
+                                            prepareDataInt(result, jsonArray, force_tuple);
+                                            break;
+                                    }
                                     result = "";
                                     number++;
                                 }
@@ -152,19 +172,102 @@ public class BluetoothActivity extends Activity {
                         } catch (IndexOutOfBoundsException e) {
 
                         }
+                        catch (Exception e){
+                            Log.e("error", e.toString());
+                            break;
+                        }
                     }
-                    Log.e(Double.toString(jsonArray.getDouble(0)),jsonArray.toString());
-                    jsonObject.put("temp", jsonArray);
                     jsonObject.put("userinfo", userid);
+                    switch (data_type){
+                        case temperature:
+                            res = "temperature";
+                            jsonObject.put("temp", force_tuple);
+                            break;
+                        case force:
+                            res = "force";
+                            jsonObject.put("fo", force_tuple);
+                            break;
+                        case accelerator:
+                            res = "accelerator";
+                            jsonObject.put("acc", force_tuple);
+                            break;
+                        case gyro:
+                            res = "gyro";
+                            jsonObject.put("gy", force_tuple);
+                            break;
+                        case heartrate:
+                            res = "heartrate";
+                            jsonObject.put("heart", force_tuple);
+                            break;
+                    }
+                    request_list.add(new BasicNameValuePair(res, jsonObject.toString()));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                request_list.add(new BasicNameValuePair("temperature", jsonObject.toString()));
-                post_thread = new PostThread(my_context, "http://59.66.138.22:5000/save/temperature", request_list, (netResult)getApplication());
-                post_thread.start();
-                request_list.clear();
-                number = 0;
+                try {
+                    post_thread = new PostThread(my_context, String.format("%s/save/%s", urlstr, res), request_list, (netResult) getApplication());
+                    post_thread.start();
+                    request_list.clear();
+                    number = 0;
+                }catch (Exception e){
+                    Log.e("error", e.toString());
+                }
             }
+        }
+    }
+
+
+    private void prepareDataDouble(String result, JSONArray one, JSONArray all) {
+        String result1;
+        double final_result;
+        if(result.lastIndexOf('\r') == -1)
+            return;
+        result = result.substring(0, result.lastIndexOf('\r'));
+        int index = result.indexOf(' ');
+        int index1 = -1;
+        int i = 0;
+        try {
+            while(index != -1) {
+                result1 = result.substring(index1 + 1, index);
+                index1 = index;
+                index = result.indexOf(' ', index + 1);
+                final_result = new Double(result1);
+                one.put(i, final_result);
+                i ++;
+            }
+            result1 = result.substring(index1 + 1);
+            final_result = new Double(result1);
+            one.put(i, final_result);
+            all.put(one);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void prepareDataInt(String result, JSONArray one, JSONArray all) {
+        String result1;
+        int final_result;
+        if(result.lastIndexOf('\r') == -1)
+            return;
+        result = result.substring(0, result.lastIndexOf('\r'));
+        int index = result.indexOf(' ');
+        int index1 = -1;
+        int i = 0;
+        try {
+            while(index != -1) {
+                result1 = result.substring(index1 + 1, index);
+                index1 = index;
+                index = result.indexOf(' ', index + 1);
+                final_result = new Integer(result1);
+                one.put(i, final_result);
+                i ++;
+            }
+            result1 = result.substring(index1 + 1);
+            final_result = new Integer(result1);
+            one.put(i, final_result);
+            all.put(one);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
@@ -176,6 +279,7 @@ public class BluetoothActivity extends Activity {
         my_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, text_list);
         text_list_view.setAdapter(my_adapter);
         edit_message.clearFocus();
+        text_show = (TextView) findViewById(R.id.text_show);
         send_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -14,7 +14,7 @@ import java.io.InputStream;
  * Created by caozj on 8/19/15.
  */
 public class GetThread extends Thread {
-    private String urlstr = "http://59.66.138.24:5000/login";
+    private String urlstr;
     private Context this_context;
     private String result;
     private netResult app;
@@ -31,9 +31,10 @@ public class GetThread extends Thread {
         this_context = con;
     }
 
+
     @Override
     public void run(){
-        app.setGet_finish(false);
+
         try {
             //创建请求并设置属性
             HttpGet my_get = new HttpGet(urlstr);

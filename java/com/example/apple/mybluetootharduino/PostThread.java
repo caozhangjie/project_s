@@ -1,6 +1,7 @@
 package com.example.apple.mybluetootharduino;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -56,6 +57,7 @@ public class PostThread extends Thread {
             int bytes = in.read(buffer);
             result = new String(buffer);
             app.setPost_result(result);
+            Log.e("error", result);
             /*MyFile file = new MyFile(this_context, "temp.txt", "temperature");
             file.openExternalPrivateFileForRead();
             file.readDatafromFile(buffer, 0, bytes);*/

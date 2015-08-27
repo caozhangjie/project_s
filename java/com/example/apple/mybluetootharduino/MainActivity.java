@@ -19,9 +19,9 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,9 +30,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MainActivity extends Activity implements OnItemClickListener {
+
+    private enum data_class{
+        temperature, force, accelerator, gyro, heartrate;
+    }
+
+    private data_class data_type;
 
     Context this_context;
     private static final int REQUEST_ENABLED = 1;
@@ -47,6 +55,9 @@ public class MainActivity extends Activity implements OnItemClickListener {
     private PostThread post_thread;
     String urlstr = "http://59.66.138.24:5000";
     private Button net_button;
+    private TextView text_show;
+    Timer timer;
+    TimerTask timerTask;
 
 
     @Override
@@ -63,11 +74,30 @@ public class MainActivity extends Activity implements OnItemClickListener {
         list_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, device_list);
         device_list_view.setAdapter(list_adapter);
         device_list_view.setOnItemClickListener(this);
+        text_show = (TextView) findViewById(R.id.text_show1);
         net_button = (Button) findViewById(R.id.connect_button);
         net_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                List<BasicNameValuePair> request_list = new ArrayList<BasicNameValuePair>();
+                String res = new String();
+                switch (data_type){
+                    case temperature:
+                        res = "temperature";
+                        break;
+                    case force:
+                        res = "force";
+                        break;
+                    case accelerator:
+                        res = "accelerator";
+                        break;
+                    case gyro:
+                        res = "gyro";
+                        break;
+                    case heartrate:
+                        res = "heartrate";
+                        break;
+                }
+                /*List<BasicNameValuePair> request_list = new ArrayList<BasicNameValuePair>();
                 JSONObject jsonObject = new JSONObject();
                 JSONArray jsonArray = new JSONArray();
                 try {
@@ -91,21 +121,43 @@ public class MainActivity extends Activity implements OnItemClickListener {
                         Log.e("result: ", ((netResult) getApplication()).getPost_result());
                         break;
                     }
-                }
+                }*/
                 /*List<BasicNameValuePair> request_list = new ArrayList<BasicNameValuePair>();
-                request_list.add(new BasicNameValuePair("username", "caozhangjie"));
-                request_list.add(new BasicNameValuePair("password", "qazwsx"));
-                post_thread = new PostThread(this_context, "http://59.66.138.34:5000/register", request_list);
+                request_list.add(new BasicNameValuePair("username", "jianghaochen"));
+                request_list.add(new BasicNameValuePair("password", "jianghaochen"));
+
+                post_thread = new PostThread(this_context, "http://101.5.218.227:5000/register", request_list, (netResult) getApplication());
                 post_thread.start();*/
-                /*get_thread = new GetThread(this_context, "http://59.66.138.22:5000/get/temperature/1", (netResult)getApplication());
+                get_thread = new GetThread(this_context, String.format("%s/get/%s/7", urlstr, res), (netResult) getApplication());
+                ((netResult) getApplication()).setGet_finish(false);
                 get_thread.start();
-                while (true)
-                {
-                    if(((netResult) getApplication()).isGet_finish()){
-                        Log.e("result: ", ((netResult) getApplication()).getGet_result());
+                while (true) {
+                    if (((netResult) getApplication()).isGet_finish()) {
                         break;
                     }
-                }*/
+                }
+                JSONObject resu;
+                JSONArray arr = null;
+                try {
+                    resu = new JSONObject(((netResult) getApplication()).getGet_result());
+                    arr = resu.getJSONArray(String.format("%s_list", res));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                int len = arr.length();
+                int count = 0;
+                int time = 0;
+                while(count < len){
+                    if(time == 0){
+                        try {
+                            Log.e("error", arr.getString(count));
+                            count ++;
+                            time ++;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
             }
         });
         button_search = (Button) findViewById(R.id.search_button);
