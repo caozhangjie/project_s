@@ -1,6 +1,9 @@
 package com.example.apple.mybluetootharduino;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -18,12 +21,14 @@ public class GetThread extends Thread {
     private Context this_context;
     private String result;
     private netResult app;
+    private Handler handler;
 
-    public GetThread(Context con, String url, netResult a){
+    public GetThread(Context con, String url, netResult a, Handler h){
         super();
         this_context = con;
         urlstr = url;
         app = a;
+        handler = h;
     }
 
     public GetThread(Context con){
@@ -52,11 +57,18 @@ public class GetThread extends Thread {
             }
             result = new String(buffer_data);
             app.setGet_result(result);
-        /*MyFile file = new MyFile(this_context, "temp.txt", "temperature");
-        file.openExternalPrivateFileForRead();
-        file.readDatafromFile(buffer, 0, bytes);*/
+            Message m = handler.obtainMessage();
+            Bundle data = new Bundle();
+            data.putBoolean("state", true);
+            m.setData(data);
+            handler.sendMessage(m);
         }catch (Exception e){
             app.setGet_finish(true);
+            Message m = handler.obtainMessage();
+            Bundle data = new Bundle();
+            data.putBoolean("state", false);
+            m.setData(data);
+            handler.sendMessage(m);
             e.printStackTrace();
         }
     }

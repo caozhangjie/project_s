@@ -1,6 +1,9 @@
 package com.example.apple.mybluetootharduino;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import org.apache.http.HttpEntity;
@@ -26,13 +29,16 @@ public class PostThread extends Thread {
     private List<BasicNameValuePair> pair_list;
     private String result;
     private netResult app;
+    private Handler handler;
 
-    public PostThread(Context con, String url, List<BasicNameValuePair> pairlist, netResult a){
+
+    public PostThread(Context con, String url, List<BasicNameValuePair> pairlist, netResult a, Handler h){
         super();
         this_context = con;
         urlstr = url;
         pair_list = new ArrayList<BasicNameValuePair>(pairlist);
         app = a;
+        handler = h;
     }
 
     public PostThread(Context con){
@@ -57,12 +63,18 @@ public class PostThread extends Thread {
             int bytes = in.read(buffer);
             result = new String(buffer);
             app.setPost_result(result);
-            Log.e("error", result);
-            /*MyFile file = new MyFile(this_context, "temp.txt", "temperature");
-            file.openExternalPrivateFileForRead();
-            file.readDatafromFile(buffer, 0, bytes);*/
+            Message m = handler.obtainMessage();
+            Bundle data = new Bundle();
+            data.putBoolean("state", true);
+            m.setData(data);
+            handler.sendMessage(m);
         }catch (Exception e){
             app.setPost_finish(true);
+            Message m = handler.obtainMessage();
+            Bundle data = new Bundle();
+            data.putBoolean("state", true);
+            m.setData(data);
+            handler.sendMessage(m);
             e.printStackTrace();
         }
     }

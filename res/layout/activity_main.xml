@@ -20,11 +20,16 @@
         android:layout_height="wrap_content"
         android:text="@string/connect_net"
         android:layout_above="@id/search_button"/>
+    <TextView
+        android:id="@+id/text_show1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/connect_button"/>
     <ListView
         android:id="@+id/device_list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_above="@id/connect_button">
+        android:layout_above="@id/text_show1">
     </ListView>
 
 </RelativeLayout>

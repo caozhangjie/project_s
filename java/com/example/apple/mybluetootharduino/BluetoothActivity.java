@@ -6,6 +6,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,12 +48,13 @@ public class BluetoothActivity extends Activity {
     private Button disconnect_button;
     private EditText edit_message;
     private TextView text_show;
-    private String urlstr = "http://59.66.138.24:5000";
+    private String urlstr = "http://59.66.138.56:5000";
     private BluetoothAdapter my_bluetooth_adapter;
     private BluetoothSocket my_bluetooth_socket;
     private BluetoothDevice my_bluetooth_device;
     private clientThread my_client;
     private readThread my_read;
+    private netDataHandler postHandler;
 
     private PostThread post_thread;
     private int threshold = 4;
@@ -61,6 +64,7 @@ public class BluetoothActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth);
         my_context = this;
+        postHandler = new netDataHandler();
         setView();
         setBluetooth();
     }
@@ -124,14 +128,15 @@ public class BluetoothActivity extends Activity {
             int number = 0; //统计收到的温度个数
             while (flag) {
                 JSONObject jsonObject = new JSONObject();
-                JSONArray jsonArray = new JSONArray();
+                JSONArray jsonArray;
                 JSONArray force_tuple = new JSONArray();
                 try {
                     JSONObject userid = new JSONObject();
-                    userid.put("userid", 1);
+                    userid.put("userid", 7);
                     while (number < threshold) {
                         try {
                             // Read from the InputStream
+                            jsonArray = new JSONArray();
                             if ((bytes = my_inputstream.read(buffer)) > 0) {
                                 byte[] buf_data = new byte[bytes];
                                 for (int i = 0; i < bytes; i++) {
@@ -177,6 +182,7 @@ public class BluetoothActivity extends Activity {
                             break;
                         }
                     }
+                    Log.e("err", force_tuple.toString());
                     jsonObject.put("userinfo", userid);
                     switch (data_type){
                         case temperature:
@@ -205,7 +211,7 @@ public class BluetoothActivity extends Activity {
                     e.printStackTrace();
                 }
                 try {
-                    post_thread = new PostThread(my_context, String.format("%s/save/%s", urlstr, res), request_list, (netResult) getApplication());
+                    post_thread = new PostThread(my_context, String.format("%s/save/%s", urlstr, res), request_list, (netResult) getApplication(),postHandler);
                     post_thread.start();
                     request_list.clear();
                     number = 0;
@@ -338,5 +344,16 @@ public class BluetoothActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    class netDataHandler extends Handler{
+        @Override
+        public void handleMessage(Message msg) {
+            Bundle b = msg.getData();
+            if(b.getBoolean("state")){
+                //收到了网络数据，进行操作
+            }
+            super.handleMessage(msg);
+        }
     }
 }

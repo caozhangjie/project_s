@@ -10,6 +10,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -58,12 +60,14 @@ public class MainActivity extends Activity implements OnItemClickListener {
     private TextView text_show;
     Timer timer;
     TimerTask timerTask;
+    private netDataHandler getHandler;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         this_context = this;
         super.onCreate(savedInstanceState);
+        getHandler = new netDataHandler();
         setContentView(R.layout.activity_main);
         setView();
         setBluetooth();
@@ -128,7 +132,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
                 post_thread = new PostThread(this_context, "http://101.5.218.227:5000/register", request_list, (netResult) getApplication());
                 post_thread.start();*/
-                get_thread = new GetThread(this_context, String.format("%s/get/%s/7", urlstr, res), (netResult) getApplication());
+                get_thread = new GetThread(this_context, String.format("%s/get/%s/7", urlstr, res), (netResult) getApplication(), getHandler);
                 ((netResult) getApplication()).setGet_finish(false);
                 get_thread.start();
                 while (true) {
@@ -315,6 +319,17 @@ public class MainActivity extends Activity implements OnItemClickListener {
                 }
                 button_search.setText(R.string.start_search);
             }
+        }
+    }
+
+    class netDataHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            Bundle b = msg.getData();
+            if(b.getBoolean("state")){
+                //收到了网络数据，进行操作
+            }
+            super.handleMessage(msg);
         }
     }
 }
