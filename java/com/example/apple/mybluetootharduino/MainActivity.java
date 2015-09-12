@@ -55,7 +55,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
     private BluetoothDeviceReceiver bluetooth_receiver;
     private GetThread get_thread;
     private PostThread post_thread;
-    String urlstr = "http://59.66.138.24:5000";
+    String urlstr = "http://59.66.138.109:5000";
     private Button net_button;
     private TextView text_show;
     Timer timer;
@@ -132,7 +132,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
                 post_thread = new PostThread(this_context, "http://101.5.218.227:5000/register", request_list, (netResult) getApplication());
                 post_thread.start();*/
-                get_thread = new GetThread(this_context, String.format("%s/get/%s/7", urlstr, res), (netResult) getApplication(), getHandler);
+                get_thread = new GetThread(this_context, String.format("%s/get/%s/3", urlstr, res), (netResult) getApplication(), getHandler);
                 ((netResult) getApplication()).setGet_finish(false);
                 get_thread.start();
                 while (true) {

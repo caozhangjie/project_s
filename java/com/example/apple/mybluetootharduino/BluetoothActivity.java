@@ -48,13 +48,14 @@ public class BluetoothActivity extends Activity {
     private Button disconnect_button;
     private EditText edit_message;
     private TextView text_show;
-    private String urlstr = "http://59.66.138.56:5000";
+    private String urlstr = "http://59.66.138.109:5000";
     private BluetoothAdapter my_bluetooth_adapter;
     private BluetoothSocket my_bluetooth_socket;
     private BluetoothDevice my_bluetooth_device;
     private clientThread my_client;
     private readThread my_read;
     private netDataHandler postHandler;
+    private bluetoothDataHandler controlHandler;
 
     private PostThread post_thread;
     private int threshold = 4;
@@ -65,42 +66,58 @@ public class BluetoothActivity extends Activity {
         setContentView(R.layout.activity_bluetooth);
         my_context = this;
         postHandler = new netDataHandler();
+        controlHandler = new bluetoothDataHandler();
         setView();
         setBluetooth();
+    }
+
+    @Override
+    protected void onResume() {
+        my_client = new clientThread(controlHandler);
+        my_client.start();
+        super.onResume();
     }
 
     private void setBluetooth() {
         my_bluetooth_adapter = BluetoothAdapter.getDefaultAdapter();
         my_bluetooth_device = my_bluetooth_adapter.getRemoteDevice(MyBluetoothDevice.bluetooth_Mac);
-        my_client = new clientThread();
-        my_client.start();
     }
 
     private class clientThread extends Thread{
+        private bluetoothDataHandler handler;
+        public clientThread(bluetoothDataHandler h){
+            handler = h;
+        }
         @Override
         public void run(){
-            try{
-
-                my_bluetooth_socket = my_bluetooth_device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
-                String msg = "正在连接\n";
-                text_list.add(msg);
-                my_adapter.notifyDataSetChanged();
-
-                my_bluetooth_socket.connect();
-                /*msg = "已连接\n";
-                text_list.add(msg);
-                my_adapter.notifyDataSetChanged();*/
-                my_read = new readThread(data_class.force);
-                my_read.start();
-            }
-            catch (IOException connectException){
+            Message m = handler.obtainMessage();
+            Bundle data = new Bundle();
                 try {
-                    my_bluetooth_socket.close();
+                    my_bluetooth_socket = my_bluetooth_device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+                if(!my_bluetooth_socket.isConnected()) {
+                    my_bluetooth_socket.connect();
+                    my_read = new readThread(data_class.force);
+                    my_read.start();
                 }
-                catch (IOException closeException){
+                    while(true) {
+                        if(!my_bluetooth_socket.isConnected()) {
+                            my_read.interrupt();
+                            my_bluetooth_socket.connect();
+                            my_read = new readThread(data_class.force);
+                            my_read.start();
+                        }
+                    }
+                } catch (IOException connectException) {
+                    try {
+                        my_bluetooth_socket.close();
+                    }
+                    catch (IOException closeException) {
+                    }
+                    data.putBoolean("state", true);
+                    m.setData(data);
+                    handler.sendMessage(m);
                 }
             }
-        }
     }
 
     protected class readThread extends Thread{
@@ -120,23 +137,30 @@ public class BluetoothActivity extends Activity {
                 my_inputstream = my_bluetooth_socket.getInputStream();
             } catch (IOException e) {
                 flag = false;
-                e.printStackTrace();
+                //e.printStackTrace();
             }
             String result = new String();
             String res = new String();
+            String temp_str;
             List<BasicNameValuePair> request_list = new ArrayList<BasicNameValuePair>();
             int number = 0; //统计收到的温度个数
             while (flag) {
                 JSONObject jsonObject = new JSONObject();
                 JSONArray jsonArray;
-                JSONArray force_tuple = new JSONArray();
+                List<JSONArray> force_tuple = new ArrayList<JSONArray>(5);
+                for(int i = 0; i < 5; i++){
+                    force_tuple.add(new JSONArray());
+                }
                 try {
                     JSONObject userid = new JSONObject();
-                    userid.put("userid", 7);
+                    userid.put("userid", 3);
                     while (number < threshold) {
                         try {
                             // Read from the InputStream
                             jsonArray = new JSONArray();
+                            if(!my_bluetooth_socket.isConnected()){
+                                break;
+                            }
                             if ((bytes = my_inputstream.read(buffer)) > 0) {
                                 byte[] buf_data = new byte[bytes];
                                 for (int i = 0; i < bytes; i++) {
@@ -146,26 +170,59 @@ public class BluetoothActivity extends Activity {
                                 result = result + msg;
                                 if (buf_data[bytes - 1] == '\n') {
                                     int len = result.length();
-                                    if (len == 0) {
+                                    if (len == 0 || result.charAt(0) < '0' || result.charAt(0) > '4') {
+                                        result = "";
                                         continue;
                                     }
-                                    switch (data_type){
-                                        case temperature:
-                                        case accelerator:
-                                        case gyro:
-                                            prepareDataDouble(result, jsonArray, force_tuple);
-                                            break;
-                                        case force:
-                                        case heartrate:
-                                            prepareDataInt(result, jsonArray, force_tuple);
-                                            break;
+                                    result = result.substring(0, result.lastIndexOf('\r'));
+                                    temp_str = new String(result);
+                                    int temp_index = result.indexOf('#');
+                                    int pre_temp_index = 0;
+                                    while(pre_temp_index != -1) {
+                                        if(pre_temp_index == 0){
+                                            pre_temp_index = -1;
+                                        }
+                                        if(temp_index == -1){
+                                            result = temp_str.substring(pre_temp_index + 1);
+                                        }
+                                        else {
+                                            result = temp_str.substring(pre_temp_index + 1, temp_index);
+                                        }
+                                        switch (result.charAt(0)) {
+                                            case '0':
+                                                data_type = data_class.temperature;
+                                                break;
+                                            case '1':
+                                                data_type = data_class.heartrate;
+                                                break;
+                                            case '2':
+                                                data_type = data_class.force;
+                                                break;
+                                        }
+                                        switch (data_type) {
+                                            case temperature:
+                                                force_tuple.get(0);
+                                                prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(0));
+                                                break;
+                                            case accelerator:
+                                                prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(1));
+                                                break;
+                                            case gyro:
+                                                prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(2));
+                                                break;
+                                            case force:
+                                                prepareDataInt(result.substring(1), jsonArray, force_tuple.get(3));
+                                                break;
+                                            case heartrate:
+                                                prepareDataInt(result.substring(1), jsonArray, force_tuple.get(4));
+                                                break;
+                                        }
+                                        pre_temp_index = temp_index;
+                                        temp_index = temp_str.indexOf('#', pre_temp_index + 1);
                                     }
                                     result = "";
                                     number++;
                                 }
-                                /*MyFile file = new MyFile(my_context, "temp.txt", "temperature");
-                                file.openExternalPrivateFileForWrite(false);
-                                file.writeDataToFile(buf_data,  0, bytes);*/
                             }
                         } catch (IOException e) {
                             try {
@@ -173,45 +230,25 @@ public class BluetoothActivity extends Activity {
                             } catch (IOException e1) {
                                 e1.printStackTrace();
                             }
-                            break;
                         } catch (IndexOutOfBoundsException e) {
 
                         }
-                        catch (Exception e){
-                            Log.e("error", e.toString());
-                            break;
-                        }
                     }
-                    Log.e("err", force_tuple.toString());
+                    if(!my_bluetooth_socket.isConnected()){
+                        break;
+                    }
                     jsonObject.put("userinfo", userid);
-                    switch (data_type){
-                        case temperature:
-                            res = "temperature";
-                            jsonObject.put("temp", force_tuple);
-                            break;
-                        case force:
-                            res = "force";
-                            jsonObject.put("fo", force_tuple);
-                            break;
-                        case accelerator:
-                            res = "accelerator";
-                            jsonObject.put("acc", force_tuple);
-                            break;
-                        case gyro:
-                            res = "gyro";
-                            jsonObject.put("gy", force_tuple);
-                            break;
-                        case heartrate:
-                            res = "heartrate";
-                            jsonObject.put("heart", force_tuple);
-                            break;
-                    }
-                    request_list.add(new BasicNameValuePair(res, jsonObject.toString()));
+                    jsonObject.put("temp", force_tuple.get(0));
+                    jsonObject.put("acc", force_tuple.get(1));
+                    jsonObject.put("gy", force_tuple.get(2));
+                    jsonObject.put("fo", force_tuple.get(3));
+                    jsonObject.put("heart", force_tuple.get(4));
+                    request_list.add(new BasicNameValuePair("all_data", jsonObject.toString()));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 try {
-                    post_thread = new PostThread(my_context, String.format("%s/save/%s", urlstr, res), request_list, (netResult) getApplication(),postHandler);
+                    post_thread = new PostThread(my_context, String.format("%s/save", urlstr), request_list, (netResult) getApplication(),postHandler);
                     post_thread.start();
                     request_list.clear();
                     number = 0;
@@ -226,9 +263,6 @@ public class BluetoothActivity extends Activity {
     private void prepareDataDouble(String result, JSONArray one, JSONArray all) {
         String result1;
         double final_result;
-        if(result.lastIndexOf('\r') == -1)
-            return;
-        result = result.substring(0, result.lastIndexOf('\r'));
         int index = result.indexOf(' ');
         int index1 = -1;
         int i = 0;
@@ -246,16 +280,13 @@ public class BluetoothActivity extends Activity {
             one.put(i, final_result);
             all.put(one);
         } catch (JSONException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
     private void prepareDataInt(String result, JSONArray one, JSONArray all) {
         String result1;
         int final_result;
-        if(result.lastIndexOf('\r') == -1)
-            return;
-        result = result.substring(0, result.lastIndexOf('\r'));
         int index = result.indexOf(' ');
         int index1 = -1;
         int i = 0;
@@ -273,7 +304,7 @@ public class BluetoothActivity extends Activity {
             one.put(i, final_result);
             all.put(one);
         } catch (JSONException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -320,7 +351,7 @@ public class BluetoothActivity extends Activity {
             os.write(msg.getBytes());
         }
         catch (IOException e){
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -352,6 +383,18 @@ public class BluetoothActivity extends Activity {
             Bundle b = msg.getData();
             if(b.getBoolean("state")){
                 //收到了网络数据，进行操作
+            }
+            super.handleMessage(msg);
+        }
+    }
+
+    class bluetoothDataHandler extends Handler{
+        @Override
+        public void handleMessage(Message msg) {
+            Bundle b = msg.getData();
+            if(b.getBoolean("state")){
+                my_client = new clientThread(controlHandler);
+                my_client.start();
             }
             super.handleMessage(msg);
         }
