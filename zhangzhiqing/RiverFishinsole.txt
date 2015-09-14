@@ -1,0 +1,65 @@
+#include <SoftwareSerial.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+SoftwareSerial mySerial(0, 1);
+#define ONE_WIRE_BUS 2 
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+
+class helloworld{};
+int analogValue1 = 0;
+int analogValue2 = 0;
+int analogValue3 = 0;
+int analogValue4 = 0;
+int analogValue5 = 0;
+int analogValue6 = 0;
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  mySerial.begin(9600);
+  sensors.begin();
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  analogValue1 = analogRead(A0);
+  analogValue2 = analogRead(A1);
+  analogValue3 = analogRead(A2);
+  analogValue4 = analogRead(A3);
+  analogValue5 = analogRead(A4);
+  analogValue6 = analogRead(A5);
+  sensors.requestTemperatures();
+  double temp = sensors.getTempCByIndex(0);
+  Serial.print('0');
+  Serial.print(temp);
+  Serial.print('#');
+  Serial.print('2');
+  Serial.print(analogValue6);
+  Serial.print(" ");
+  Serial.print(analogValue5);
+  Serial.print(" ");
+  Serial.print(analogValue4);
+  Serial.print(" ");
+  Serial.print(analogValue3);
+  Serial.print(" ");
+  Serial.print(analogValue2);
+  Serial.print(" ");
+  Serial.println(analogValue1);
+  mySerial.print('0');
+  mySerial.print(temp);
+  mySerial.print('#');
+  mySerial.print('2');  
+  mySerial.print(analogValue6);
+  mySerial.print(" "); 
+  mySerial.print(analogValue5);
+  mySerial.print(" "); 
+  mySerial.print(analogValue4);
+  mySerial.print(" "); 
+  mySerial.print(analogValue3);
+  mySerial.print(" ");
+  mySerial.print(analogValue2);
+  mySerial.print(" ");
+  mySerial.println(analogValue1);
+  delay(1000);
+}
