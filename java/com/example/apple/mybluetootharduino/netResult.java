@@ -10,13 +10,21 @@ public class netResult extends Application {
     private String post_result;
     private boolean get_finish;
     private boolean post_finish;
+    private int userid;
+    private FootLanguage footLanguage;
 
     @Override
     public void onCreate(){
         super.onCreate();
+        footLanguage = new FootLanguage();
         get_finish = true;
         post_finish = true;
     }
+
+    FootLanguage getFootLanguage(){return footLanguage;}
+
+    public void setUserid(int i){ userid = i;}
+    public int getUserid(){return userid;}
 
     public boolean isGet_finish(){
         return get_finish;
