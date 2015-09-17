@@ -23,21 +23,23 @@ import java.util.List;
 
 
 public class PostThread extends Thread {
-    private String urlstr = "http://59.66.138.24:5000/login";
+    private String urlstr;
     private Context this_context;
     private List<BasicNameValuePair> pair_list;
     private String result;
     private netResult app;
     private Handler handler;
+    private BluetoothActivity.function function_type;
 
 
-    public PostThread(Context con, String url, List<BasicNameValuePair> pairlist, netResult a, Handler h){
+    public PostThread(Context con, String url, List<BasicNameValuePair> pairlist, netResult a, Handler h, BluetoothActivity.function f_type){
         super();
         this_context = con;
         urlstr = url;
         pair_list = new ArrayList<BasicNameValuePair>(pairlist);
         app = a;
         handler = h;
+        function_type = f_type;
     }
 
     public PostThread(Context con){
@@ -72,6 +74,7 @@ public class PostThread extends Thread {
             Message m = handler.obtainMessage();
             Bundle data = new Bundle();
             data.putBoolean("state", true);
+            data.putString("function_type", function_type.toString());
             m.setData(data);
             handler.sendMessage(m);
             e.printStackTrace();

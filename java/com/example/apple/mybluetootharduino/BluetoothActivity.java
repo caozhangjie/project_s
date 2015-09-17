@@ -41,6 +41,10 @@ public class BluetoothActivity extends Activity {
         temperature, force, accelerator, gyro, heartrate;
     }
 
+    enum function{
+        depict_heat_map, save_data;
+    }
+
     Context my_context;
     private ListView text_list_view;
     private List<String> text_list = new ArrayList<String>();
@@ -49,7 +53,7 @@ public class BluetoothActivity extends Activity {
     private Button disconnect_button;
     private EditText edit_message;
     private TextView text_show;
-    private String urlstr = "http://101.5.208.93:5000";
+    private String urlstr;
     private BluetoothAdapter my_bluetooth_adapter;
     private BluetoothSocket my_bluetooth_socket;
     private BluetoothDevice my_bluetooth_device;
@@ -73,6 +77,7 @@ public class BluetoothActivity extends Activity {
         my_userid = ((netResult) getApplication()).getUserid();
         setContentView(R.layout.activity_bluetooth);
         my_context = this;
+        urlstr = getString(R.string.url_address);
         postHandler = new netDataHandler();
         controlHandler = new bluetoothDataHandler();
         footLanguageHandler = new calculateHandler();
@@ -153,144 +158,118 @@ public class BluetoothActivity extends Activity {
             }
             double [] data_to_foot_language = new double[15];
             String result = new String();
-            String res = new String();
             String temp_str;
-            List<BasicNameValuePair> request_list = new ArrayList<BasicNameValuePair>();
-            int number = 0; //统计收到的温度个数
             while (flag) {
-                JSONObject jsonObject = new JSONObject();
                 JSONArray jsonArray;
                 List<JSONArray> force_tuple = new ArrayList<JSONArray>(5);
-                for(int i = 0; i < 5; i++){
+                for (int i = 0; i < 5; i++) {
                     force_tuple.add(new JSONArray());
                 }
                 try {
-                    JSONObject userid = new JSONObject();
-                    userid.put("userid", my_userid);
-                    while (number < threshold) {
-                        try {
-                            // Read from the InputStream
-                            if(!my_bluetooth_socket.isConnected()){
-                                break;
-                            }
-                            if ((bytes = my_inputstream.read(buffer)) > 0) {
-                                byte[] buf_data = new byte[bytes];
-                                for (int i = 0; i < bytes; i++) {
-                                    buf_data[i] = buffer[i];
-                                }
-                                String msg = new String(buf_data);
-                                result = result + msg;
-                                if (buf_data[bytes - 1] == '\n') {
-                                    int len = result.length();
-                                    if (len == 0 || result.charAt(0) < '0' || result.charAt(0) > '4') {
-                                        result = "";
-                                        continue;
-                                    }
-                                    result = result.substring(0, result.lastIndexOf('\r'));
-                                    temp_str = new String(result);
-                                    int temp_index = result.indexOf('#');
-                                    int pre_temp_index = 0;
-                                    while(pre_temp_index != -1) {
-                                        jsonArray = new JSONArray();
-                                        if(pre_temp_index == 0){
-                                            pre_temp_index = -1;
-                                        }
-                                        if(temp_index == -1){
-                                            result = temp_str.substring(pre_temp_index + 1);
-                                        }
-                                        else {
-                                            result = temp_str.substring(pre_temp_index + 1, temp_index);
-                                        }
-                                        switch (result.charAt(0)) {
-                                            case '0':
-                                                data_type = data_class.temperature;
-                                                break;
-                                            case '1':
-                                                data_type = data_class.heartrate;
-                                                break;
-                                            case '2':
-                                                data_type = data_class.force;
-                                                break;
-                                            case '3':
-                                                data_type = data_class.accelerator;
-                                                break;
-                                            case '4':
-                                                data_type = data_class.gyro;
-                                                break;
-                                        }
-                                        switch (data_type) {
-                                            case temperature:
-                                                prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(0));
-                                                my_helper.temperatureAdd(my_userid, jsonArray.getDouble(0));
-                                                break;
-                                            case accelerator:
-                                                prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(1));
-                                                my_helper.acceleratorAdd(my_userid, jsonArray.getDouble(0), jsonArray.getDouble(1), jsonArray.getDouble(2));
-                                                for(int i = 6; i < 9; i++) {
-                                                    data_to_foot_language[i] = jsonArray.getDouble(i - 6);
-                                                }
-                                                break;
-                                            case gyro:
-                                                prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(2));
-                                                my_helper.gyroAdd(my_userid, jsonArray.getDouble(0), jsonArray.getDouble(1), jsonArray.getDouble(2), jsonArray.getDouble(3), jsonArray.getDouble(4), jsonArray.getDouble(5), jsonArray.getDouble(6));
-                                                for(int i = 9; i < 15; i++) {
-                                                    data_to_foot_language[i] = jsonArray.getDouble(i - 8);
-                                                }
-                                                break;
-                                            case force:
-                                                prepareDataInt(result.substring(1), jsonArray, force_tuple.get(3));
-                                                my_helper.forceAdd(my_userid, jsonArray.getInt(0), jsonArray.getInt(1), jsonArray.getInt(2), jsonArray.getInt(3), jsonArray.getInt(4), jsonArray.getInt(5));
-                                                for(int i = 0; i < 6; i++) {
-                                                    data_to_foot_language[i] = jsonArray.getDouble(i); //最后用处理过的数据直接作为力
-                                                }
-                                                break;
-                                            case heartrate:
-                                                prepareDataInt(result.substring(1), jsonArray, force_tuple.get(4));
-                                                my_helper.heartrateAdd(my_userid, jsonArray.getInt(0));
-                                                break;
-                                        }
-                                        pre_temp_index = temp_index;
-                                        temp_index = temp_str.indexOf('#', pre_temp_index + 1);
-                                    }
-                                    Message hanmsg = new Message();
-                                    Bundle data = new Bundle();
-                                    data.putDoubleArray("new_data", data_to_foot_language);
-                                    hanmsg.setData(data);
-                                    calculateHandler.sendMessage(hanmsg);
-                                    result = "";
-                                    number++;
-                                }
-                            }
-                        } catch (IOException e) {
-                            try {
-                                my_inputstream.close();
-                            } catch (IOException e1) {
-                                e1.printStackTrace();
-                            }
-                        } catch (IndexOutOfBoundsException e) {
-
-                        }
-                    }
-                    if(!my_bluetooth_socket.isConnected()){
+                    // Read from the InputStream
+                    if (!my_bluetooth_socket.isConnected()) {
                         break;
                     }
-                    jsonObject.put("userinfo", userid);
-                    jsonObject.put("temp", force_tuple.get(0));
-                    jsonObject.put("acc", force_tuple.get(1));
-                    jsonObject.put("gy", force_tuple.get(2));
-                    jsonObject.put("fo", force_tuple.get(3));
-                    jsonObject.put("heart", force_tuple.get(4));
-                    request_list.add(new BasicNameValuePair("all_data", jsonObject.toString()));
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    if ((bytes = my_inputstream.read(buffer)) > 0) {
+                        byte[] buf_data = new byte[bytes];
+                        for (int i = 0; i < bytes; i++) {
+                            buf_data[i] = buffer[i];
+                        }
+                        String msg = new String(buf_data);
+                        result = result + msg;
+                        if (buf_data[bytes - 1] == '\n') {
+                            int len = result.length();
+                            if (len == 0 || result.charAt(0) < '0' || result.charAt(0) > '4') {
+                                result = "";
+                                continue;
+                            }
+                            result = result.substring(0, result.lastIndexOf('\r'));
+                            temp_str = new String(result);
+                            int temp_index = result.indexOf('#');
+                            int pre_temp_index = 0;
+                            while (pre_temp_index != -1) {
+                                jsonArray = new JSONArray();
+                                if (pre_temp_index == 0) {
+                                    pre_temp_index = -1;
+                                }
+                                if (temp_index == -1) {
+                                    result = temp_str.substring(pre_temp_index + 1);
+                                } else {
+                                    result = temp_str.substring(pre_temp_index + 1, temp_index);
+                                }
+                                switch (result.charAt(0)) {
+                                    case '0':
+                                        data_type = data_class.temperature;
+                                        break;
+                                    case '1':
+                                        data_type = data_class.heartrate;
+                                        break;
+                                    case '2':
+                                        data_type = data_class.force;
+                                        break;
+                                    case '3':
+                                        data_type = data_class.accelerator;
+                                        break;
+                                    case '4':
+                                        data_type = data_class.gyro;
+                                        break;
+                                }
+                                switch (data_type) {
+                                    case temperature:
+                                        prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(0));
+                                        my_helper.temperatureAdd(my_userid, jsonArray.getDouble(0));
+                                        break;
+                                    case accelerator:
+                                        prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(1));
+                                        my_helper.acceleratorAdd(my_userid, jsonArray.getDouble(0), jsonArray.getDouble(1), jsonArray.getDouble(2));
+                                        for (int i = 6; i < 9; i++) {
+                                            data_to_foot_language[i] = jsonArray.getDouble(i - 6);
+                                        }
+                                        break;
+                                    case gyro:
+                                        prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(2));
+                                        my_helper.gyroAdd(my_userid, jsonArray.getDouble(0), jsonArray.getDouble(1), jsonArray.getDouble(2), jsonArray.getDouble(3), jsonArray.getDouble(4), jsonArray.getDouble(5), jsonArray.getDouble(6));
+                                        for (int i = 9; i < 15; i++) {
+                                            data_to_foot_language[i] = jsonArray.getDouble(i - 8);
+                                        }
+                                        break;
+                                    case force:
+                                        prepareDataInt(result.substring(1), jsonArray, force_tuple.get(3));
+                                        my_helper.forceAdd(my_userid, jsonArray.getInt(0), jsonArray.getInt(1), jsonArray.getInt(2), jsonArray.getInt(3), jsonArray.getInt(4), jsonArray.getInt(5));
+                                        for (int i = 0; i < 6; i++) {
+                                            data_to_foot_language[i] = jsonArray.getDouble(i); //最后用处理过的数据直接作为力
+                                        }
+                                        break;
+                                    case heartrate:
+                                        prepareDataInt(result.substring(1), jsonArray, force_tuple.get(4));
+                                        my_helper.heartrateAdd(my_userid, jsonArray.getInt(0));
+                                        break;
+                                }
+                                pre_temp_index = temp_index;
+                                temp_index = temp_str.indexOf('#', pre_temp_index + 1);
+                            }
+                            Message hanmsg = new Message();
+                            Bundle data = new Bundle();
+                            data.putDoubleArray("new_data", data_to_foot_language);
+                            hanmsg.setData(data);
+                            calculateHandler.sendMessage(hanmsg);
+                            result = "";
+                        }
+                    }
+                } catch (IOException e) {
+                    try {
+                        my_inputstream.close();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                } catch (IndexOutOfBoundsException e) {
+
                 }
-                try {
-                    post_thread = new PostThread(my_context, String.format("%s/save", urlstr), request_list, app, postHandler);
-                    post_thread.start();
-                    request_list.clear();
-                    number = 0;
-                }catch (Exception e){
-                    Log.e("error", e.toString());
+                catch (JSONException e){
+
+                }
+                if (!my_bluetooth_socket.isConnected()) {
+                    break;
                 }
             }
         }
@@ -313,7 +292,7 @@ public class BluetoothActivity extends Activity {
             e.printStackTrace();
         }
         try {
-            post_thread = new PostThread(my_context, String.format("%s/save", urlstr), request_list, app, postHandler);
+            post_thread = new PostThread(my_context, String.format("%s/save", urlstr), request_list, app, postHandler, function.save_data);
             post_thread.start();
         }catch (Exception e){
             Log.e("error", e.toString());
@@ -441,11 +420,41 @@ public class BluetoothActivity extends Activity {
         @Override
         public void handleMessage(Message msg) {
             Bundle b = msg.getData();
+            JSONObject jsonObject;
             if(b.getBoolean("state")){
-                //收到了网络数据，进行操作
+                if(b.getString("function_type").equals(function.depict_heat_map.toString())){
+                    try {
+                        jsonObject = new JSONObject(app.getGet_result());
+                        JSONArray force_matrix = jsonObject.getJSONArray("force_list");
+                        int len = force_matrix.length();
+                        int len1 = force_matrix.getJSONArray(0).length();
+                        double [][] force_data = new double[len][len1];
+                        for(int i = 0; i < len; i++) {
+                            for(int j = 0; j < len1; j++) {
+                                force_data[i][j] = force_matrix.getJSONArray(i).getDouble(j);
+                            }
+                        }
+                        //force_data是已有的25*75的矩阵，在这里插入画图函数或画图代码
+                    } catch (JSONException e) {
+
+                    }
+                }
+
             }
             super.handleMessage(msg);
         }
+    }
+
+    public void depict_heat_map(JSONArray jsonArray) {
+        List<BasicNameValuePair> request_list = new ArrayList<BasicNameValuePair>();
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("force_data", jsonArray);
+        } catch (JSONException e) {
+
+        }
+        request_list.add(new BasicNameValuePair("all_data", jsonObject.toString()));
+        PostThread getThread = new PostThread(my_context, String.format("%s/get/force/heat_map", urlstr), request_list, app, postHandler, function.depict_heat_map);
     }
 
     class bluetoothDataHandler extends Handler{

@@ -22,7 +22,7 @@ import java.util.List;
 
 public class MainActivity extends Activity {
 
-    private String urlstr = "http://101.5.208.93:5000";
+    private String urlstr;
     private netDataHandler postHandler;
     private static final int REQUEST_ENABLED = 1;
     private TextView password;
@@ -37,6 +37,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        urlstr = getString(R.string.url_address);
         app = (netResult) getApplication();
         setContentView(R.layout.activity_main);
         my_context = this;

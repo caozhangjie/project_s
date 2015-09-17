@@ -22,13 +22,15 @@ public class GetThread extends Thread {
     private String result;
     private netResult app;
     private Handler handler;
+    private BluetoothActivity.function function_type;
 
-    public GetThread(Context con, String url, netResult a, Handler h){
+    public GetThread(Context con, String url, netResult a, Handler h, BluetoothActivity.function f_type){
         super();
         this_context = con;
         urlstr = url;
         app = a;
         handler = h;
+        function_type = f_type;
     }
 
     public GetThread(Context con){
@@ -60,6 +62,7 @@ public class GetThread extends Thread {
             Message m = handler.obtainMessage();
             Bundle data = new Bundle();
             data.putBoolean("state", true);
+            data.putString("function_type", function_type.toString());
             m.setData(data);
             handler.sendMessage(m);
         }catch (Exception e){

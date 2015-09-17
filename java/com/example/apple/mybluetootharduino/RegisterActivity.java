@@ -31,13 +31,14 @@ public class RegisterActivity extends Activity {
     Context my_context;
     PostThread post_thread;
     private netResult app;
-    private String urlstr = "http://101.5.208.93:5000";
+    private String urlstr;
     private netDataHandler postHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         my_context = this;
+        urlstr = getString(R.string.url_address);
         app = (netResult) getApplication();
         postHandler = new netDataHandler();
         setContentView(R.layout.activity_register);

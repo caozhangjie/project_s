@@ -55,7 +55,7 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
     private BluetoothDeviceReceiver bluetooth_receiver;
     private GetThread get_thread;
     private PostThread post_thread;
-    String urlstr = "http://101.5.208.93:5000";
+    private String urlstr;
     private Button net_button;
     private TextView text_show;
     Timer timer;
@@ -68,6 +68,7 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         this_context = this;
         super.onCreate(savedInstanceState);
+        urlstr = getString(R.string.url_address);
         userid = ((netResult) getApplication()).getUserid();
         getHandler = new netDataHandler();
         setContentView(R.layout.activity_connect);
@@ -134,7 +135,7 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
 
                 post_thread = new PostThread(this_context, "http://101.5.218.227:5000/register", request_list, (netResult) getApplication());
                 post_thread.start();*/
-                get_thread = new GetThread(this_context, String.format("%s/get/%s/3", urlstr, res), (netResult) getApplication(), getHandler);
+                get_thread = new GetThread(this_context, String.format("%s/get/%s/3", urlstr, res), (netResult) getApplication(), getHandler, BluetoothActivity.function.depict_heat_map);
                 ((netResult) getApplication()).setGet_finish(false);
                 get_thread.start();
                 while (true) {

@@ -10,7 +10,7 @@
     <string name="disconnect_">断开</string>
     <string name="title_activity_bluetooth">BluetoothActivity</string>
     <string name="title_activity_connect">ConnectActivity</string>
-
+    <string name="url_address">http://101.5.107.164:5000</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_register">RegisterActivity</string>
 </resources>
