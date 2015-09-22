@@ -1,4 +1,4 @@
-package com.example.apple.mybluetootharduino;
+package com.example.aslan.project_s;
 
 import android.app.Application;
 
@@ -12,16 +12,21 @@ public class netResult extends Application {
     private boolean post_finish;
     private int userid;
     private FootLanguage footLanguage;
+    public DictionaryOpenHelper helper;
 
     @Override
     public void onCreate(){
         super.onCreate();
         footLanguage = new FootLanguage();
+        helper = new DictionaryOpenHelper(this);
         get_finish = true;
         post_finish = true;
     }
 
     FootLanguage getFootLanguage(){return footLanguage;}
+
+    DictionaryOpenHelper getHelper(){return helper;}
+
 
     public void setUserid(int i){ userid = i;}
     public int getUserid(){return userid;}

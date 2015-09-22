@@ -1,4 +1,4 @@
-package com.example.apple.mybluetootharduino;
+package com.example.aslan.project_s;
 
 /**
  * Created by caozj on 9/12/15.
@@ -35,7 +35,7 @@ public class DictionaryOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        //åˆ›å»ºè¡¨
+        //´´½¨±í
         db.execSQL("drop table if exists temperature");
         db.execSQL("drop table if exists force");
         db.execSQL("drop table if exists accelerator");
@@ -48,7 +48,7 @@ public class DictionaryOpenHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_GYRO);
     }
 
-    //æ·»åŠ è¡Œ
+    //Ìí¼ÓĞĞ
     public long temperatureAdd(int userid, double tempvalue) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues temp = new ContentValues();
@@ -98,7 +98,7 @@ public class DictionaryOpenHelper extends SQLiteOpenHelper {
         return db.insert("gyro",null,temp);
     }
 
-    //è·å–æ•°æ®æ€»æ•°
+    //»ñÈ¡Êı¾İ×ÜÊı
     public long countTemperature() {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery("select count(*) from temperature", null);
@@ -135,7 +135,7 @@ public class DictionaryOpenHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    //è·å–æœ€æ–°æ•°æ®
+    //»ñÈ¡×îĞÂÊı¾İ
     public int getLastuseridFromTemperature() {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery("select count(*) from temperature", null);
@@ -321,7 +321,7 @@ public class DictionaryOpenHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    //æ¸…é™¤è¡¨
+    //Çå³ı±í
     public void clearTemperature()
     {
         SQLiteDatabase db = this.getWritableDatabase();

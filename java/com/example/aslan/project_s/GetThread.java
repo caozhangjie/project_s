@@ -1,4 +1,4 @@
-package com.example.apple.mybluetootharduino;
+package com.example.aslan.project_s;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -43,9 +43,9 @@ public class GetThread extends Thread {
     public void run(){
 
         try {
-            //åˆ›å»ºè¯·æ±‚å¹¶è®¾ç½®å±žæ€§
+            //´´½¨ÇëÇó²¢ÉèÖÃÊôÐÔ
             HttpGet my_get = new HttpGet(urlstr);
-            //åˆ›å»ºå®¢æˆ·ç«¯å¹¶æ‰§è¡Œè¯·æ±‚
+            //´´½¨¿Í»§¶Ë²¢Ö´ÐÐÇëÇó
             HttpClient client = new DefaultHttpClient();
             HttpResponse response = client.execute(my_get);
             HttpEntity response_entity = response.getEntity();

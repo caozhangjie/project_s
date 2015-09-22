@@ -1,4 +1,4 @@
-package com.example.apple.mybluetootharduino;
+package com.example.aslan.project_s;
 
 import android.app.Activity;
 import android.content.Context;
@@ -51,7 +51,7 @@ public class RegisterActivity extends Activity {
         request_list.add(new BasicNameValuePair("password", password));
         request_list.add(new BasicNameValuePair("email", email));
         request_list.add(new BasicNameValuePair("telephone", telephone));
-        post_thread = new PostThread(my_context, String.format("%s/register", urlstr), request_list, (netResult) getApplication(), postHandler);
+        post_thread = new PostThread(my_context, String.format("%s/register", urlstr), request_list, (netResult) getApplication(), postHandler , BluetoothActivity.function.register);
         post_thread.start();
     }
 
@@ -68,7 +68,7 @@ public class RegisterActivity extends Activity {
             public void onClick(View view) {
 
                 if (!password1.getText().toString().equals(password2.getText().toString())) {
-                    Toast.makeText(getApplicationContext(), "å¯†ç ä¸ä¸€è‡´", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "ÃÜÂë²»Ò»ÖÂ", Toast.LENGTH_SHORT).show();
                     password1.setText("password");
                     password2.setText("password");
                     return;
@@ -107,10 +107,10 @@ public class RegisterActivity extends Activity {
             Bundle b = msg.getData();
             if(b.getBoolean("state")){
                 if(app.getPost_result().substring(0, "The username has already been registered.".length()).equals("The username has already been registered.")){
-                    Toast.makeText(getApplicationContext(), "ç”¨æˆ·åå·²å­˜åœ¨", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "ÓÃ»§ÃûÒÑ´æÔÚ", Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    Toast.makeText(getApplicationContext(), "æ³¨å†ŒæˆåŠŸ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "×¢²á³É¹¦", Toast.LENGTH_SHORT).show();
                     Intent message = new Intent(RegisterActivity.this, MainActivity.class);
                     startActivity(message);
                 }

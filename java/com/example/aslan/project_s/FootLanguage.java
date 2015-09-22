@@ -1,4 +1,4 @@
-package com.example.apple.mybluetootharduino;
+package com.example.aslan.project_s;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +59,7 @@ public class FootLanguage {
         }
         distance_matrix[width][length] = -1;
 
-        //鍒濆鍖杤_matrix
+        //初始化v_matrix
         for(int i = 0; i < width + 1; i++){
             for(int j = 0; j < length + 1; j++){
                 v_matrix[i][j] = 1;
@@ -142,11 +142,11 @@ public class FootLanguage {
                 }
             }
             if(number_find != -1){
-                //鎵ц鐩稿簲鑴氳
+                //执行相应脚语
                 number_find = -1;
             }
             else{
-                //娌℃壘鍒拌剼璇殑鎿嶄綔
+                //没找到脚语的操作
             }
         }
     }

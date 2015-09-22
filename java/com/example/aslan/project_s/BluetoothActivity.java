@@ -1,10 +1,11 @@
-package com.example.apple.mybluetootharduino;
+package com.example.aslan.project_s;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,7 +43,7 @@ public class BluetoothActivity extends Activity {
     }
 
     enum function{
-        depict_heat_map, save_data;
+        depict_heat_map, save_data, register , enter_in;
     }
 
     Context my_context;
@@ -62,14 +63,14 @@ public class BluetoothActivity extends Activity {
     private netDataHandler postHandler;
     private bluetoothDataHandler controlHandler;
     private calculateHandler footLanguageHandler;
+    private Button button_show;
     private int my_userid;
     private netResult app;
 
     private PostThread post_thread;
     private int threshold = 4;
 
-    private DictionaryOpenHelper my_helper = new DictionaryOpenHelper(this);
-    private SQLiteDatabase my_database = null;
+    private DictionaryOpenHelper my_helper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +83,7 @@ public class BluetoothActivity extends Activity {
         controlHandler = new bluetoothDataHandler();
         footLanguageHandler = new calculateHandler();
         app = (netResult) getApplication();
+        my_helper = app.getHelper();
         setView();
         setBluetooth();
     }
@@ -107,32 +109,32 @@ public class BluetoothActivity extends Activity {
         public void run(){
             Message m = handler.obtainMessage();
             Bundle data = new Bundle();
-                try {
-                    my_bluetooth_socket = my_bluetooth_device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+            try {
+                my_bluetooth_socket = my_bluetooth_device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
                 if(!my_bluetooth_socket.isConnected()) {
                     my_bluetooth_socket.connect();
                     my_read = new readThread(data_class.force, footLanguageHandler);
                     my_read.start();
                 }
-                    while(true) {
-                        if(!my_bluetooth_socket.isConnected()) {
-                            my_read.interrupt();
-                            my_bluetooth_socket.connect();
-                            my_read = new readThread(data_class.force, footLanguageHandler);
-                            my_read.start();
-                        }
+                while(true) {
+                    if(!my_bluetooth_socket.isConnected()) {
+                        my_read.interrupt();
+                        my_bluetooth_socket.connect();
+                        my_read = new readThread(data_class.force, footLanguageHandler);
+                        my_read.start();
                     }
-                } catch (IOException connectException) {
-                    try {
-                        my_bluetooth_socket.close();
-                    }
-                    catch (IOException closeException) {
-                    }
-                    data.putBoolean("state", true);
-                    m.setData(data);
-                    handler.sendMessage(m);
                 }
+            } catch (IOException connectException) {
+                try {
+                    my_bluetooth_socket.close();
+                }
+                catch (IOException closeException) {
+                }
+                data.putBoolean("state", true);
+                m.setData(data);
+                handler.sendMessage(m);
             }
+        }
     }
 
     protected class readThread extends Thread{
@@ -237,7 +239,7 @@ public class BluetoothActivity extends Activity {
                                         prepareDataInt(result.substring(1), jsonArray, force_tuple.get(3));
                                         my_helper.forceAdd(my_userid, jsonArray.getInt(0), jsonArray.getInt(1), jsonArray.getInt(2), jsonArray.getInt(3), jsonArray.getInt(4), jsonArray.getInt(5));
                                         for (int i = 0; i < 6; i++) {
-                                            data_to_foot_language[i] = jsonArray.getDouble(i); //æœ€åŽç”¨å¤„ç†è¿‡çš„æ•°æ®ç›´æŽ¥ä½œä¸ºåŠ›
+                                            data_to_foot_language[i] = jsonArray.getDouble(i); //×îºóÓÃ´¦Àí¹ýµÄÊý¾ÝÖ±½Ó×÷ÎªÁ¦
                                         }
                                         break;
                                     case heartrate:
@@ -367,7 +369,7 @@ public class BluetoothActivity extends Activity {
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(edit_message.getWindowToken(), 0);
                 } else {
-                    Toast.makeText(my_context, "å‘é€å†…å®¹ä¸èƒ½ä¸ºç©º", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(my_context, "·¢ËÍÄÚÈÝ²»ÄÜÎª¿Õ", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -382,7 +384,7 @@ public class BluetoothActivity extends Activity {
 
     private void sendMessage(String msg) {
         if(my_bluetooth_socket == null){
-            Toast.makeText(my_context, "æœªè¿žæŽ¥", Toast.LENGTH_SHORT).show();
+            Toast.makeText(my_context, "Î´Á¬½Ó", Toast.LENGTH_SHORT).show();
             return;
         }
         try{
@@ -416,7 +418,7 @@ public class BluetoothActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    class netDataHandler extends Handler{
+    class netDataHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             Bundle b = msg.getData();
@@ -434,7 +436,7 @@ public class BluetoothActivity extends Activity {
                                 force_data[i][j] = force_matrix.getJSONArray(i).getDouble(j);
                             }
                         }
-                        //force_dataæ˜¯å·²æœ‰çš„25*75çš„çŸ©é˜µï¼Œåœ¨è¿™é‡Œæ’å…¥ç”»å›¾å‡½æ•°æˆ–ç”»å›¾ä»£ç 
+                        //force_dataÊÇÒÑÓÐµÄ25*75µÄ¾ØÕó£¬ÔÚÕâÀï²åÈë»­Í¼º¯Êý»ò»­Í¼´úÂë
                     } catch (JSONException e) {
 
                     }
@@ -456,6 +458,7 @@ public class BluetoothActivity extends Activity {
         request_list.add(new BasicNameValuePair("all_data", jsonObject.toString()));
         PostThread getThread = new PostThread(my_context, String.format("%s/get/force/heat_map", urlstr), request_list, app, postHandler, function.depict_heat_map);
     }
+
 
     class bluetoothDataHandler extends Handler{
         @Override

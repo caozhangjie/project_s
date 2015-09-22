@@ -1,4 +1,4 @@
-package com.example.apple.mybluetootharduino;
+package com.example.aslan.project_s;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -77,6 +77,7 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
     }
 
     private void setView(){
+        Log.e("22222222","22222222");
         device_list_view = (ListView)findViewById(R.id.device_list);
         list_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, device_list);
         device_list_view.setAdapter(list_adapter);
@@ -86,7 +87,7 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
         net_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String res = new String();
+                /*String res = new String();
                 switch (data_type){
                     case temperature:
                         res = "temperature";
@@ -134,7 +135,7 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
                 request_list.add(new BasicNameValuePair("password", "jianghaochen"));
 
                 post_thread = new PostThread(this_context, "http://101.5.218.227:5000/register", request_list, (netResult) getApplication());
-                post_thread.start();*/
+                post_thread.start();
                 get_thread = new GetThread(this_context, String.format("%s/get/%s/3", urlstr, res), (netResult) getApplication(), getHandler, BluetoothActivity.function.depict_heat_map);
                 ((netResult) getApplication()).setGet_finish(false);
                 get_thread.start();
@@ -164,6 +165,14 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
                             e.printStackTrace();
                         }
                     }
+                }*/
+                Log.e("show","1");
+                try{
+                    Intent show = new Intent(ConnectActivity.this, ShowActivity.class);
+                    startActivity(show);
+                }
+                catch (Exception e){
+                    Log.e(e.toString(),"1111");
                 }
             }
         });
@@ -330,7 +339,7 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
         public void handleMessage(Message msg) {
             Bundle b = msg.getData();
             if(b.getBoolean("state")){
-                //鏀跺埌浜嗙綉缁滄暟鎹紝杩涜鎿嶄綔
+                //收到了网络数据，进行操作
             }
             super.handleMessage(msg);
         }

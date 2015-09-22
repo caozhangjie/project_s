@@ -1,4 +1,4 @@
-package com.example.apple.mybluetootharduino;
+package com.example.aslan.project_s;
 
 import android.app.Activity;
 import android.content.Context;
@@ -63,7 +63,7 @@ public class MainActivity extends Activity {
                 List<BasicNameValuePair> request_list = new ArrayList<BasicNameValuePair>();
                 request_list.add(new BasicNameValuePair("username", name.getText().toString()));
                 request_list.add(new BasicNameValuePair("password", password.getText().toString()));
-                post_thread = new PostThread(my_context, String.format("%s/login", urlstr), request_list, (netResult) getApplication(), postHandler);
+                post_thread = new PostThread(my_context, String.format("%s/login", urlstr), request_list, (netResult) getApplication(), postHandler , BluetoothActivity.function.enter_in);
                 post_thread.start();
             }
         });
@@ -106,10 +106,10 @@ public class MainActivity extends Activity {
                         startActivity(message);
                     } else if (result.substring(0, "The password is wrong.".length()).equals("The password is wrong.")) {
                         app.setUserid(-1);
-                        Toast.makeText(getApplicationContext(), "å¯†ç é”™è¯¯", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "ÃÜÂë´íÎó", Toast.LENGTH_SHORT).show();
                     } else {
                         app.setUserid(-1);
-                        Toast.makeText(getApplicationContext(), "ç”¨æˆ·åé”™è¯¯", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "ÓÃ»§Ãû´íÎó", Toast.LENGTH_SHORT).show();
                     }
                 }
                 super.handleMessage(msg);

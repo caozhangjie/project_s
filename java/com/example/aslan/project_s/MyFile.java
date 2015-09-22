@@ -1,4 +1,4 @@
-package com.example.apple.mybluetootharduino;
+package com.example.aslan.project_s;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -31,7 +31,7 @@ public class MyFile extends ContextWrapper{
         output_is_open = false;
     }
 
-    //æ„é€ å‡½æ•°ï¼ŒæŒ‡å®šå½“å‰ä¸Šä¸‹æ–‡ï¼Œæ–‡ä»¶åå’Œæ–‡ä»¶ç›®å½•å
+    //¹¹Ôìº¯Êı£¬Ö¸¶¨µ±Ç°ÉÏÏÂÎÄ£¬ÎÄ¼şÃûºÍÎÄ¼şÄ¿Â¼Ãû
     public MyFile(Context context, String temp_file_name, String temp_directory_name){
         super(context);
         file_name = temp_file_name;
@@ -67,7 +67,7 @@ public class MyFile extends ContextWrapper{
         }
     }
 
-    //æ‰“å¼€æ–‡ä»¶æ¥è¯»ï¼Œæ–‡ä»¶åå·²æŒ‡å®š
+    //´ò¿ªÎÄ¼şÀ´¶Á£¬ÎÄ¼şÃûÒÑÖ¸¶¨
     public void openExternalPrivateFileForRead() {
         file = new File(getExternalFilesDir(directory_name), file_name);
         if(file.exists()) {
@@ -99,7 +99,7 @@ public class MyFile extends ContextWrapper{
         return true;
     }
 
-    //ä»æŸæ–‡ä»¶ä¸­è¯»å–offsetä½ç½®å¼€å§‹è¯»bytecountä¸ªbyteåˆ°data
+    //´ÓÄ³ÎÄ¼şÖĞ¶ÁÈ¡offsetÎ»ÖÃ¿ªÊ¼¶Ábytecount¸öbyteµ½data
     public boolean readDatafromFile(byte [] data, int offset, int bytecount){
         try{
             if(input_is_open) {
