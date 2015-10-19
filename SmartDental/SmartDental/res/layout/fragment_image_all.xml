@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 全部的电子病历记录 -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+      <!-- 搜索框 -->
+    <EditText
+        android:id="@+id/image_searchbox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:hint="输入要搜索的图片"
+        android:drawablePadding="5dp"
+        android:singleLine="true"
+        android:ems="10">
+        <requestFocus/>
+    </EditText>
+    
+    <!-- 病历列表 -->
+    <!-- 最好改成多种情况，比如未读、隐藏、标记…… -->
+    <ListView 
+        android:id="@+id/image_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/image_searchbox"
+        android:divider="@color/app_grey"
+        android:dividerHeight="1dp"
+        >
+    </ListView>
+
+</RelativeLayout>

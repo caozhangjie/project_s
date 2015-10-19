@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 历史EMR -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/app_white"
+    >
+    <!-- tab列表，全部、未读、隐藏、标记 -->
+    <RadioGroup
+        android:id="@+id/emr_tab"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        >
+        <RadioButton
+            android:id="@+id/emr_tab_all"
+            style="@style/emr_tab"
+            android:drawableBottom="@drawable/emr_tab_bottom"
+            android:text="全部" />
+        <RadioButton
+            android:id="@+id/emr_tab_unread"
+            style="@style/emr_tab"
+            android:drawableBottom="@drawable/emr_tab_bottom"
+            android:text="未读" />
+        <RadioButton
+            android:id="@+id/emr_tab_hide"
+            style="@style/emr_tab"
+            android:drawableBottom="@drawable/emr_tab_bottom"
+            android:text="隐藏" />
+        <RadioButton
+            android:id="@+id/emr_tab_mark"
+            style="@style/emr_tab"
+            android:drawableBottom="@drawable/emr_tab_bottom"
+            android:text="标记" />
+    </RadioGroup>
+    <FrameLayout
+        android:id="@+id/emr_tab_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/emr_tab"
+        />
+  
+
+</RelativeLayout>

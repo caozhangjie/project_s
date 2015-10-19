@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    >
+   <!-- android:scaleType="centerInside" -->
+    <Button 
+        android:id="@+id/calendar_left"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_alignParentLeft="true"
+        android:contentDescription="@null"
+        android:background="@drawable/ic_arrow_left"
+        android:layout_centerVertical="true"
+        android:layout_alignBottom="@+id/calendar_title"
+        android:layout_marginBottom="10dp"
+        
+        />
+     <TextView
+        android:id="@+id/calendar_title"
+        style="@style/calendar_bar_text_style"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="lala"
+        android:layout_margin="0dp"
+        android:padding="10dp"
+        
+        />
+
+    <Button
+        android:id="@+id/calendar_right"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/calendar_left"
+        android:background="@drawable/ic_arrow_right"
+        android:contentDescription="@null"
+        android:layout_marginBottom="10dp" />
+
+     <com.edu.thss.smartdental.ui.calendar.CalendarView
+         android:id="@+id/calendar"
+         android:layout_width="fill_parent"
+         android:layout_height="match_parent"
+         android:layout_alignParentLeft="true"
+         android:layout_below="@+id/calendar_title"
+         />
+    
+    
+
+</RelativeLayout>

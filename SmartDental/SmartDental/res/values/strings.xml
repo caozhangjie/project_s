@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SmartDental</string>
+    <string name="title_activity_home">SmartDental</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="title_activity_one_emr">详细病历查看</string>
+    <string name="title_activity_one_image">详细图片查看</string>
+    <string name="title_activity_edit_basic_info">编辑个人基本信息</string>
+    <string name="title_activity_edit_extends_info">编辑其它个人信息</string>
+    <string name="title_activity_edit_contact">编辑联系方式</string>
+    <string name="title_activity_edit_pass">编辑既往史</string>
+    <string name="title_activity_edit_allergy">编辑过敏史</string>
+    <string name="title_activity_edit_family">编辑家族史</string>
+    <string name="title_activity_oneday_appoint">个人预约查看</string>
+
+</resources>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.edu.thss.smartdental"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="17" />
+
+    <!-- android:icon="@drawable/ic_launcher" -->
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.edu.thss.smartdental.MainActivity"
+            android:label="@string/title_activity_home"
+            android:launchMode="standard" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.edu.thss.smartdental.OneEMRActivity"
+            android:label="@string/title_activity_one_emr" >
+        </activity>
+        <activity
+            android:name="com.edu.thss.smartdental.OneImageActivity"
+            android:label="@string/title_activity_one_image" >
+        </activity>
+        <activity
+            android:name="com.edu.thss.smartdental.EditBasicInfoActivity"
+            android:label="@string/title_activity_edit_basic_info" >
+        </activity>
+        <activity
+            android:name="com.edu.thss.smartdental.EditExtendsInfoActivity"
+            android:label="@string/title_activity_edit_extends_info" >
+        </activity>
+        <activity
+            android:name="com.edu.thss.smartdental.EditContactActivity"
+            android:label="@string/title_activity_edit_contact" >
+        </activity>
+        <activity
+            android:name="com.edu.thss.smartdental.EditPassActivity"
+            android:label="@string/title_activity_edit_pass" >
+        </activity>
+        <activity
+            android:name="com.edu.thss.smartdental.EditAllergyActivity"
+            android:label="@string/title_activity_edit_allergy" >
+        </activity>
+        <activity
+            android:name="com.edu.thss.smartdental.EditFamilyActivity"
+            android:label="@string/title_activity_edit_family" >
+        </activity>
+        <activity
+            android:name="com.edu.thss.smartdental.OnedayAppointActivity"
+            android:label="@string/title_activity_oneday_appoint" >
+        </activity>
+    </application>
+
+</manifest>

@@ -1,0 +1,50 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_gravity="center"
+    android:background="@color/app_white"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    tools:context=".OneImageActivity" >
+    
+    <ImageView
+        android:id="@+id/one_image_view"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/one_image_op"
+        android:layout_gravity="center"
+        
+        android:scaleType = "matrix" />
+    <LinearLayout 
+        android:id="@+id/one_image_op"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        >
+
+       	<Button
+       	    android:id="@+id/image_leftRotate"
+       	    android:layout_width="match_parent"
+       	    android:layout_height="50dp"
+       	    android:layout_weight="1"
+       	    android:text="逆时针90"
+       	    android:background="@color/app_blue"
+       	    android:textColor="@color/app_white" />
+
+        <Button
+        android:id="@+id/image_rightRotate"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_weight="1"
+        android:text="顺时针90"
+        android:layout_marginLeft="10dp"
+        android:textColor="@color/app_white"
+        android:background="@color/app_blue"
+         /> 
+    </LinearLayout>
+   
+
+</RelativeLayout>

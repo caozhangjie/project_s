@@ -1,0 +1,58 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/app_white"
+    tools:context=".OneEMRActivity" >
+	<WebView android:id="@+id/emr_table"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    >
+	    </WebView>
+   <!--  TableLayout
+       android:id="@+id/emr_table"
+       android:layout_width="fill_parent"
+       android:layout_height="wrap_content"
+       android:stretchColumns="*"
+       android:background="#000000"
+       >
+       <TableRow android:background="#ffffff"
+           	     android:layout_margin="2dip"
+           >
+           <TextView android:text="电子病历首页"
+                     android:layout_span="6"
+                     android:layout_margin="2dip"
+                     />
+        </TableRow>
+        <TableRow android:background="#ffffff"
+           	      android:layout_margin="2dip"
+            >
+            <TextView android:text="姓名" 
+                      android:layout_margin="2dip"/>
+            <TextView android:id="@+id/emr_name"
+                      android:layout_margin="2dip"/>
+            <TextView android:text="性别"
+                      android:layout_margin="2dip"/>
+            <TextView android:id="@+id/emr_gender"
+                      android:layout_margin="2dip"/> 
+            <TextView android:text="出生日期"
+                      android:layout_margin="2dip"/> 
+            <TextView android:id="@+id/emr_birth"
+                      android:layout_margin="2dip"/>
+        </TableRow>
+        <TableRow android:background="#ffffff"
+           	      android:layout_margin="2dip"
+            >
+            <TextView android:text="身份证号"
+                      android:layout_margin="2dip"/>
+            <TextView android:id="@+id/emr_id" 
+                      android:layout_span="2"
+                      android:layout_margin="2dip"/>
+            <TextView android:text="医保号"
+                      android:layout_margin="2dip"/>  
+            <TextView android:id="@+id/emr_medicareid" 
+                      android:layout_span="2"
+                      android:layout_margin="2dip"/> 
+        </TableRow>
+       </TableLayout-->
+</RelativeLayout>

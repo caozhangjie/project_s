@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp">"
+    <TextView android:id="@+id/tooth_father_title"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:textSize="20sp"
+        	android:textColor="@color/app_blue"
+        	android:padding="0dp"
+        	android:gravity="center"
+        	android:layout_alignParentLeft="true"
+        	/>
+    <!-- android:layout_toLeftOf="@+id/tooth_father_arrow" 
+    android:layout_alignBottom="@+id/tooth_father_arrow"
+    -->
+     <ImageView android:id="@+id/tooth_father_arrow"
+            android:layout_width="20dp"
+        	android:layout_height="20dp"
+        	android:contentDescription="@null"
+        	android:layout_alignParentRight="true"
+        	android:layout_centerVertical="true"
+        	/>"
+
+</RelativeLayout>

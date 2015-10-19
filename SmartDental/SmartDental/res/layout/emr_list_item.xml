@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- emr历史记录中每一个item的格式 -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/fragment_emr_row_background"
+    android:orientation="horizontal" >
+    
+	<!-- RelativeLayout 
+	  android:id="@+id/emr_list_item_ibox" 
+	  android:layout_width="100dp" 
+	  android:layout_height="fill_parent"
+	  android:layout_marginRight="10dp"
+	>
+	</RelativeLayout-->
+	<!-- TextView
+	    android:id="@+id/emr_list_item_classlabel"
+	    android:layout_width="10dp"
+	    android:layout_height="fill_parent"
+	    android:layout_alignParentLeft="true"
+	    android:background="@color/app_blue"
+	    /-->
+	 <!-- ImageView
+     	 android:id="@+id/emr_list_item_image"
+     	 android:layout_width="80dp"
+     	 android:layout_height="80dp"
+     	 android:layout_marginLeft="10dp"
+     	 android:layout_marginRight="10dp"
+     	 android:layout_marginTop="5dp"
+     	 android:src="@drawable/ic_drawer_home"
+     	 android:contentDescription="info Image Icon"/-->
+	
+	<!-- RelativeLayout 
+	    android:id="@+id/emr_list_item_content"
+	    android:layout_toRightOf="@+id/emr_list_item_ibox"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:layout_marginRight="10dp"
+	    >
+	    </RelativeLayout-->
+
+	<TextView 
+	    android:id="@+id/emr_list_item_title"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_marginLeft="10dp"
+	    android:layout_marginTop="10dp"
+	    android:textSize="20sp"
+	    android:textColor="@color/app_black"
+	    android:text="Name"
+	    />
+	<TextView 
+	    android:id="@+id/emr_list_item_description"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:textSize="16sp"
+	    android:textColor="@color/app_grey"
+	    android:layout_alignLeft="@+id/emr_list_item_title"
+	    android:layout_below="@+id/emr_list_item_title"
+	    android:layout_marginTop="10dp"
+	    android:layout_marginBottom="10dp"
+	    android:text="description"
+	    />
+	<TextView 
+	    android:id="@+id/emr_list_item_time"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:textSize="16sp"
+	    android:textColor="@color/app_grey"
+	    android:layout_alignParentRight="true"
+	    android:layout_alignParentTop="true"
+	    android:layout_marginTop="10dp"
+	    android:text="time"
+	    />
+	<Button
+	    android:id="@+id/emr_list_item_hint"
+	    android:layout_width="wrap_content"
+	    android:layout_height="30dp"
+	    android:layout_below="@+id/emr_list_item_description"
+	    android:layout_marginRight="10dp"
+	    android:layout_marginLeft="10dp"
+	    android:background="@color/app_white"
+	    android:text="标记"
+	    android:textSize="16sp"
+	    android:textColor="@color/app_blue"
+	    android:layout_marginBottom="5dp"
+	     />
+	<Button
+	    android:id="@+id/emr_list_item_read"
+	    android:layout_width="wrap_content"
+	    android:layout_height="30dp"
+	    android:layout_marginLeft="10dp"
+	    android:layout_alignBottom="@+id/emr_list_item_hint"
+	    android:layout_marginRight="10dp"
+	    android:layout_toRightOf="@+id/emr_list_item_hint"
+	    android:textSize="16sp"
+	    android:background="@color/app_white"
+	    android:text="阅读" 
+	    android:textColor="@color/app_blue" />
+	<Button
+	    android:id="@+id/emr_list_item_hide"
+	    android:layout_width="wrap_content"
+	    android:layout_height="30dp"
+	    android:layout_marginLeft="10dp"
+	    android:layout_alignBottom="@+id/emr_list_item_hint"
+	    android:layout_marginRight="10dp"
+	    android:layout_toRightOf="@+id/emr_list_item_read"
+	    android:textSize="16sp"
+	    android:background="@color/app_white"
+	    android:text="隐藏" 
+	    android:textColor="@color/app_blue"/>
+	<Button
+	    android:id="@+id/emr_list_item_delete"
+	    android:layout_width="wrap_content"
+	    android:layout_height="30dp"
+	    android:layout_marginLeft="10dp"
+	    android:layout_alignBottom="@+id/emr_list_item_hint"
+	    android:layout_toRightOf="@+id/emr_list_item_hide"
+	    android:textSize="16sp"
+	    android:background="@color/app_white"
+	    android:text="删除"
+	    android:textColor="@color/app_blue"  />
+	<ImageView
+	    android:id="@+id/emr_list_item_icon"
+	    android:layout_width="30dp"
+	    android:layout_height="30dp"
+	    android:layout_below="@+id/emr_list_item_time"
+	    android:layout_alignParentRight="true"
+	    android:layout_marginRight="10dp"
+	    />
+	
+</RelativeLayout>

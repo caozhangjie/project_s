@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/calendar_actionbar_text1"
+    android:textColor="@color/app_blue"
+    android:background="@color/app_white"
+    android:layout_width="100dp"
+    android:layout_height="match_parent"
+    android:textAppearance="?android:attr/textAppearanceListItemSmall"
+    android:gravity="center"
+    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+    
+     >
+    </TextView>
+<!-- android:paddingStart="?android:attr/listPreferredItemPaddingStart" -->

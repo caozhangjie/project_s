@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="drawer_list_item_title">#fff</color>
+    <color name="drawer_list_background">#303030</color>
+    <color name="drawer_list_background_pressed">#992416</color>
+    <color name="drawer_list_divider">#272727</color>
+    <color name="drawer_counter_text_bg">#626262</color>
+    <color name="drawer_counter_text_color">#c5c4c4</color>
+    <color name="fragment_background">#EAEAEA</color>
+    <color name="fragment_info_row_background">#ffffff</color>
+    <color name="fragment_emr_row_background">#ffffff</color>
+    <!-- 暗灰色 -->
+    <color name="dimgrey">#696969</color>
+     <color name="gray">#808080</color>
+    <!-- 灰色 -->
+    <color name="floralwhite">#FFFAF0</color>
+    <!-- 花白色 -->
+    
+    
+    <!-- 系统会用到的蓝色 -->
+    <color name="app_blue1">#1E90FF</color>
+    <color name="app_blue2">#FFF4842D</color>
+    <!-- 系统会用到的背景色 -->
+    <color name="app_bg_grey">#303030</color>
+    <!-- 系统会用到的白色 -->
+    <color name="app_white">#ffffff</color>
+    <!-- 系统会用到的灰色1 -->
+    <color name="app_grey">#cccccc</color>
+    <!--  系统用到的蓝色1-->
+    <color name="app_blue">#00bfff</color>
+    
+    <color name="app_black">#000000</color>
+    
+</resources>
+<!-- #303030 #cccccc-->
+ <!-- #992416 #b6d7a8-->
