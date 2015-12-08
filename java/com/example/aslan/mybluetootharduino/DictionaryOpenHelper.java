@@ -1,4 +1,4 @@
-package com.example.aslan.project_s;
+package com.example.aslan.mybluetootharduino;
 
 /**
  * Created by caozj on 9/12/15.
@@ -9,6 +9,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DictionaryOpenHelper extends SQLiteOpenHelper {
 
@@ -35,7 +36,8 @@ public class DictionaryOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        //´´½¨±í
+        //åˆ›å»ºè¡¨
+        Log.e("database","create");
         db.execSQL("drop table if exists temperature");
         db.execSQL("drop table if exists force");
         db.execSQL("drop table if exists accelerator");
@@ -48,7 +50,7 @@ public class DictionaryOpenHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_GYRO);
     }
 
-    //Ìí¼ÓĞĞ
+    //æ·»åŠ è¡Œ
     public long temperatureAdd(int userid, double tempvalue) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues temp = new ContentValues();
@@ -98,7 +100,7 @@ public class DictionaryOpenHelper extends SQLiteOpenHelper {
         return db.insert("gyro",null,temp);
     }
 
-    //»ñÈ¡Êı¾İ×ÜÊı
+    //è·å–æ•°æ®æ€»æ•°
     public long countTemperature() {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery("select count(*) from temperature", null);
@@ -135,7 +137,7 @@ public class DictionaryOpenHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    //»ñÈ¡×îĞÂÊı¾İ
+    //è·å–æœ€æ–°æ•°æ®
     public int getLastuseridFromTemperature() {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery("select count(*) from temperature", null);
@@ -321,7 +323,7 @@ public class DictionaryOpenHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    //Çå³ı±í
+    //æ¸…é™¤è¡¨
     public void clearTemperature()
     {
         SQLiteDatabase db = this.getWritableDatabase();

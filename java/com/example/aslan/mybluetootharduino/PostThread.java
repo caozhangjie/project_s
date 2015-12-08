@@ -1,4 +1,4 @@
-package com.example.aslan.project_s;
+package com.example.aslan.mybluetootharduino;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -14,6 +14,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,29 +54,26 @@ public class PostThread extends Thread {
     public void run(){
         app.setPost_finish(false);
         try {
-            //创建请求并设置属性
+            //麓麓陆篓脟毛脟贸虏垄脡猫脰脙脢么脨脭
             HttpEntity request_entity = new UrlEncodedFormEntity(pair_list);
             HttpPost my_post = new HttpPost(urlstr);
             my_post.setEntity(request_entity);
-            //创建客户端并执行请求
-            Log.e("client", "1");
             HttpClient client = new DefaultHttpClient();
-            Log.e("client", "3");
             HttpResponse response = client.execute(my_post);
-            Log.e("client", "2");
             HttpEntity response_entity = response.getEntity();
             InputStream in = response_entity.getContent();
             byte[] buffer = new byte[1000000];
             int bytes = in.read(buffer);
+
+            //temporary_Save(buffer , Context.MODE_APPEND);
+
             result = new String(buffer);
-            Log.e("bytes",Integer.toString(bytes));
             String result_sum = "";
             if(function_type == BluetoothActivity.function.depict_heat_map) {
                 while (buffer[bytes - 1] != '#') {
                     result = new String(buffer);
                     result_sum = result_sum + result.substring(0, bytes);
                     bytes = in.read(buffer);
-                    Log.e("bytes", Integer.toString(bytes));
                     if (bytes <= 0) break;
                 }
                 result = new String(buffer);
@@ -86,6 +85,7 @@ public class PostThread extends Thread {
             else {
                 app.setPost_result(result);
             }
+
             Message m = handler.obtainMessage();
             Bundle data = new Bundle();
             data.putBoolean("state", true);
@@ -104,4 +104,17 @@ public class PostThread extends Thread {
         }
     }
 
+    private void temporary_Save(byte[] buffer , int id){
+
+        FileOutputStream out = null;
+        try {
+            out = this_context.openFileOutput("filename", id);
+            out.write(buffer);
+            out.close();
+        } catch (java.io.IOException e) {
+            Log.e("Tempsave failed", "110");
+            e.printStackTrace();
+        }
+
+    }
 }

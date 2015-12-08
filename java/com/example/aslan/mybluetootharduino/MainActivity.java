@@ -1,4 +1,4 @@
-package com.example.aslan.project_s;
+package com.example.aslan.mybluetootharduino;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +29,7 @@ public class MainActivity extends Activity {
     private TextView password;
     private TextView name;
     private Button button_enter;
+    private ImageButton button_head;
     private Button button_register;
     Context my_context;
     PostThread post_thread;
@@ -55,6 +57,7 @@ public class MainActivity extends Activity {
     public void setView(){
         password = (TextView)findViewById(R.id.editText_password);
         name = (TextView)findViewById(R.id.editText_name);
+        button_head = (ImageButton)findViewById(R.id.imageButton);
         button_enter = (Button)findViewById(R.id.button_enter);
         button_register = (Button)findViewById(R.id.button_register);
         button_enter.setOnClickListener(new View.OnClickListener() {
@@ -63,8 +66,10 @@ public class MainActivity extends Activity {
                 List<BasicNameValuePair> request_list = new ArrayList<BasicNameValuePair>();
                 request_list.add(new BasicNameValuePair("username", name.getText().toString()));
                 request_list.add(new BasicNameValuePair("password", password.getText().toString()));
-                post_thread = new PostThread(my_context, String.format("%s/login", urlstr), request_list, (netResult) getApplication(), postHandler , BluetoothActivity.function.enter_in);
+                post_thread = new PostThread(my_context, String.format("%s/login", urlstr), request_list, (netResult) getApplication(), postHandler, BluetoothActivity.function.enter_in);
                 post_thread.start();
+                /*Intent todo = new Intent(MainActivity.this, TodoActivity.class);
+                startActivity(todo);*/
             }
         });
         button_register.setOnClickListener(new View.OnClickListener() {
@@ -74,6 +79,7 @@ public class MainActivity extends Activity {
                 startActivity(register);
             }
         });
+
     }
 
     @Override
@@ -102,14 +108,14 @@ public class MainActivity extends Activity {
 
                     if (index != -1) {
                         app.setUserid(Integer.parseInt(result.substring(0, index)));
-                        Intent message = new Intent(my_context, ConnectActivity.class);
+                        Intent message = new Intent(my_context, TodoActivity.class);
                         startActivity(message);
                     } else if (result.substring(0, "The password is wrong.".length()).equals("The password is wrong.")) {
                         app.setUserid(-1);
-                        Toast.makeText(getApplicationContext(), "√‹¬Î¥ÌŒÛ", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "ÂØÜÁ†ÅÈîôËØØ", Toast.LENGTH_SHORT).show();
                     } else {
                         app.setUserid(-1);
-                        Toast.makeText(getApplicationContext(), "”√ªß√˚¥ÌŒÛ", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Áî®Êà∑ÂêçÈîôËØØ", Toast.LENGTH_SHORT).show();
                     }
                 }
                 super.handleMessage(msg);

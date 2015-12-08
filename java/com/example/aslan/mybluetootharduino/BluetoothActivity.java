@@ -1,39 +1,38 @@
-package com.example.aslan.project_s;
+package com.example.aslan.mybluetootharduino;
 
-import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
-import android.content.Context;
-import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+        import android.app.Activity;
+        import android.bluetooth.BluetoothAdapter;
+        import android.bluetooth.BluetoothDevice;
+        import android.bluetooth.BluetoothSocket;
+        import android.content.Context;
+        import android.content.Intent;
+        import android.os.Bundle;
+        import android.os.Handler;
+        import android.os.Message;
+        import android.util.Log;
+        import android.view.Menu;
+        import android.view.MenuItem;
+        import android.view.View;
+        import android.view.inputmethod.InputMethodManager;
+        import android.widget.ArrayAdapter;
+        import android.widget.Button;
+        import android.widget.EditText;
+        import android.widget.ListView;
+        import android.widget.TextView;
+        import android.widget.Toast;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+        import org.apache.http.message.BasicNameValuePair;
+        import org.json.JSONArray;
+        import org.json.JSONException;
+        import org.json.JSONObject;
 
+        import java.io.IOException;
+        import java.io.InputStream;
+        import java.io.OutputStream;
+        import java.util.ArrayList;
+        import java.util.List;
+        import java.util.UUID;
 
 
 public class BluetoothActivity extends Activity {
@@ -53,11 +52,9 @@ public class BluetoothActivity extends Activity {
     private Button send_button;
     private Button disconnect_button;
     private EditText edit_message;
+    private int num_of_reconnect;
     private TextView text_show;
     private String urlstr;
-    private BluetoothAdapter my_bluetooth_adapter;
-    private BluetoothSocket my_bluetooth_socket;
-    private BluetoothDevice my_bluetooth_device;
     private clientThread my_client;
     private readThread my_read;
     private netDataHandler postHandler;
@@ -75,6 +72,7 @@ public class BluetoothActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        num_of_reconnect = 0;
         my_userid = ((netResult) getApplication()).getUserid();
         setContentView(R.layout.activity_bluetooth);
         my_context = this;
@@ -85,196 +83,269 @@ public class BluetoothActivity extends Activity {
         app = (netResult) getApplication();
         my_helper = app.getHelper();
         setView();
-        setBluetooth();
+        my_read = new readThread(data_class.force, controlHandler);
+        my_read.start();
     }
 
     @Override
-    protected void onResume() {
-        my_client = new clientThread(controlHandler);
-        my_client.start();
-        super.onResume();
+    protected void onDestroy() {
+        my_client.setDes(true);
+        super.onDestroy();
     }
 
-    private void setBluetooth() {
-        my_bluetooth_adapter = BluetoothAdapter.getDefaultAdapter();
-        my_bluetooth_device = my_bluetooth_adapter.getRemoteDevice(MyBluetoothDevice.bluetooth_Mac);
-    }
 
     private class clientThread extends Thread{
         private bluetoothDataHandler handler;
+        boolean is_des = false;
         public clientThread(bluetoothDataHandler h){
             handler = h;
         }
+
+        void setDes(boolean g){
+            is_des = g;
+        }
+
         @Override
-        public void run(){
+        public void run() {
             Message m = handler.obtainMessage();
             Bundle data = new Bundle();
-            try {
-                my_bluetooth_socket = my_bluetooth_device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
-                if(!my_bluetooth_socket.isConnected()) {
-                    my_bluetooth_socket.connect();
-                    my_read = new readThread(data_class.force, footLanguageHandler);
+            for(int i = 0; i < 3 && !app.my_bluetooth_socket.isConnected(); i++) {
+                try {
+                    app.my_bluetooth_socket.connect();
+                    my_read = new readThread(data_class.gyro, handler);
                     my_read.start();
-                }
-                while(true) {
-                    if(!my_bluetooth_socket.isConnected()) {
-                        my_read.interrupt();
-                        my_bluetooth_socket.connect();
-                        my_read = new readThread(data_class.force, footLanguageHandler);
-                        my_read.start();
+                } catch (IOException connectException) {
+                    Log.e("connect ", "false");
+                    if(i == 2) {
+                        data.putBoolean("connect", false);
+                        m.setData(data);
+                        handler.sendMessage(m);
                     }
                 }
-            } catch (IOException connectException) {
-                try {
-                    my_bluetooth_socket.close();
-                }
-                catch (IOException closeException) {
-                }
-                data.putBoolean("state", true);
-                m.setData(data);
-                handler.sendMessage(m);
             }
         }
     }
 
     protected class readThread extends Thread{
+        private Boolean disconnect_flag = false;
         private data_class data_type;
-        private calculateHandler calculateHandler;
-        public readThread(data_class data_, calculateHandler h){
+        private Handler handler;
+        public readThread(data_class data_, Handler h){
             super();
             data_type = data_;
-            calculateHandler = h;
+            handler = h;
+        }
+
+        public void setDisconnect_flag(Boolean flag){
+            disconnect_flag = flag;
         }
 
         @Override
         public void run() {
+            Message m = handler.obtainMessage();
+            Bundle data = new Bundle();
             byte[] buffer = new byte[1024];
             int bytes;
             boolean flag = true;
             InputStream my_inputstream = null;
+
             try {
-                my_inputstream = my_bluetooth_socket.getInputStream();
+                my_inputstream = app.my_bluetooth_socket.getInputStream();
             } catch (IOException e) {
-                flag = false;
-                //e.printStackTrace();
+                flag = false;  //Ëøû‰∏ç‰∏äÂ∞±‰∏çËØª‰∫Ü
             }
             double [] data_to_foot_language = new double[15];
-            String result = new String();
+            String result;
+            String result_buf = new String();
+            int number = 0;
+            boolean first_data = true;
+            List<JSONArray> force_tuple = new ArrayList<JSONArray>(5);
+            for (int i = 0; i < 5; i++) {
+                force_tuple.add(new JSONArray());
+            }
             String temp_str;
+
             while (flag) {
-                JSONArray jsonArray;
-                List<JSONArray> force_tuple = new ArrayList<JSONArray>(5);
-                for (int i = 0; i < 5; i++) {
-                    force_tuple.add(new JSONArray());
-                }
-                try {
-                    // Read from the InputStream
-                    if (!my_bluetooth_socket.isConnected()) {
+                if(disconnect_flag){
+                    try {
+                        my_inputstream.close();
+                        app.my_bluetooth_socket.close();
+                        break;
+                    } catch (IOException e) {
+                        e.printStackTrace();
                         break;
                     }
+                }
+                JSONArray jsonArray;
+                try {
+                    // Read from the InputStream
                     if ((bytes = my_inputstream.read(buffer)) > 0) {
                         byte[] buf_data = new byte[bytes];
                         for (int i = 0; i < bytes; i++) {
                             buf_data[i] = buffer[i];
                         }
                         String msg = new String(buf_data);
-                        result = result + msg;
-                        if (buf_data[bytes - 1] == '\n') {
-                            int len = result.length();
-                            if (len == 0 || result.charAt(0) < '0' || result.charAt(0) > '4') {
+                        result_buf = result_buf + msg;
+                        for(int j = 0; j < bytes; j++){
+                            if(buf_data[j] == '\n'){
+                                int huanhangfu = result_buf.indexOf('\n');
+                                result = result_buf.substring(0, huanhangfu);
+                                result_buf = result_buf.substring(huanhangfu + 1);
+                                //Á¨¨‰∏ÄÊù°Êï∞ÊçÆÊ∞∏ËøúÊòØÈîôÁöÑÔºå‰∏¢ÂºÉ
+                                if(first_data) {
+                                    first_data = false;
+                                    break;
+                                }
+                                if(!checkDataValidation(result)){
+                                    continue;
+                                }
+                                result = result.substring(0, result.lastIndexOf('\r'));
+                                //ÂàáÂ≠óÁ¨¶‰∏≤ÔºåÂÖàÂÅöÂ§á‰ªΩ
+                                temp_str = new String(result);
+                                int temp_index = result.indexOf('#');
+                                get_data(temp_index, temp_str, data_type, force_tuple, data_to_foot_language);
+                                number ++;
                                 result = "";
-                                continue;
-                            }
-                            result = result.substring(0, result.lastIndexOf('\r'));
-                            temp_str = new String(result);
-                            int temp_index = result.indexOf('#');
-                            int pre_temp_index = 0;
-                            while (pre_temp_index != -1) {
-                                jsonArray = new JSONArray();
-                                if (pre_temp_index == 0) {
-                                    pre_temp_index = -1;
-                                }
-                                if (temp_index == -1) {
-                                    result = temp_str.substring(pre_temp_index + 1);
-                                } else {
-                                    result = temp_str.substring(pre_temp_index + 1, temp_index);
-                                }
-                                switch (result.charAt(0)) {
-                                    case '0':
-                                        data_type = data_class.temperature;
-                                        break;
-                                    case '1':
-                                        data_type = data_class.heartrate;
-                                        break;
-                                    case '2':
-                                        data_type = data_class.force;
-                                        break;
-                                    case '3':
-                                        data_type = data_class.accelerator;
-                                        break;
-                                    case '4':
-                                        data_type = data_class.gyro;
-                                        break;
-                                }
-                                switch (data_type) {
-                                    case temperature:
-                                        prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(0));
-                                        my_helper.temperatureAdd(my_userid, jsonArray.getDouble(0));
-                                        break;
-                                    case accelerator:
-                                        prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(1));
-                                        my_helper.acceleratorAdd(my_userid, jsonArray.getDouble(0), jsonArray.getDouble(1), jsonArray.getDouble(2));
-                                        for (int i = 6; i < 9; i++) {
-                                            data_to_foot_language[i] = jsonArray.getDouble(i - 6);
-                                        }
-                                        break;
-                                    case gyro:
-                                        prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(2));
-                                        my_helper.gyroAdd(my_userid, jsonArray.getDouble(0), jsonArray.getDouble(1), jsonArray.getDouble(2), jsonArray.getDouble(3), jsonArray.getDouble(4), jsonArray.getDouble(5), jsonArray.getDouble(6));
-                                        for (int i = 9; i < 15; i++) {
-                                            data_to_foot_language[i] = jsonArray.getDouble(i - 8);
-                                        }
-                                        break;
-                                    case force:
-                                        prepareDataInt(result.substring(1), jsonArray, force_tuple.get(3));
-                                        my_helper.forceAdd(my_userid, jsonArray.getInt(0), jsonArray.getInt(1), jsonArray.getInt(2), jsonArray.getInt(3), jsonArray.getInt(4), jsonArray.getInt(5));
-                                        for (int i = 0; i < 6; i++) {
-                                            data_to_foot_language[i] = jsonArray.getDouble(i); //◊Ó∫Û”√¥¶¿Ìπ˝µƒ ˝æ›÷±Ω”◊˜Œ™¡¶
-                                        }
-                                        break;
-                                    case heartrate:
-                                        prepareDataInt(result.substring(1), jsonArray, force_tuple.get(4));
-                                        my_helper.heartrateAdd(my_userid, jsonArray.getInt(0));
-                                        break;
-                                }
-                                pre_temp_index = temp_index;
-                                temp_index = temp_str.indexOf('#', pre_temp_index + 1);
-                            }
-                            Message hanmsg = new Message();
+                                break;
+                            /*Message hanmsg = new Message();
                             Bundle data = new Bundle();
                             data.putDoubleArray("new_data", data_to_foot_language);
                             hanmsg.setData(data);
                             calculateHandler.sendMessage(hanmsg);
-                            result = "";
+                            */
+                            }
                         }
                     }
-                } catch (IOException e) {
+                    postDataToServer(force_tuple);
+                }
+                catch (IOException e) {
+                    Log.e("exp1", e.toString());
                     try {
                         my_inputstream.close();
                     } catch (IOException e1) {
                         e1.printStackTrace();
+                        break;
                     }
-                } catch (IndexOutOfBoundsException e) {
-
+                    break;
                 }
-                catch (JSONException e){
-
+                catch (IndexOutOfBoundsException e) {
+                    Log.e("exp2",e.toString());
                 }
-                if (!my_bluetooth_socket.isConnected()) {
+                if (!app.my_bluetooth_socket.isConnected()) {
+                    try {
+                        my_inputstream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        break;
+                    }
+                    break;
+                }
+                try{
+                    if(number > 5) {
+                        force_tuple.clear();
+                        for (int i = 0; i < 5; i++) {
+                            force_tuple.add(new JSONArray());
+                        }
+                        number = 0;
+                    }
+                }
+                catch (Exception e){
+                    try {
+                        my_inputstream.close();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                        break;
+                    }
+                    break;
+                }
+                if (!app.my_bluetooth_socket.isConnected()) {
                     break;
                 }
             }
+            data.putBoolean("reconnect", true);
+            m.setData(data);
+            handler.sendMessage(m);
         }
+    }
+
+    private void get_data(int temp_index,  String temp_str, data_class data_type, List<JSONArray> force_tuple, double [] data_to_foot_language){
+        JSONArray jsonArray;
+        String result;
+        try{
+            int pre_temp_index = 0;
+            while (pre_temp_index != -1) {
+                jsonArray = new JSONArray();
+                if (pre_temp_index == 0) {
+                    pre_temp_index = -1;
+                }
+                if (temp_index == -1) {
+                    result = temp_str.substring(pre_temp_index + 1);
+                } else {
+                    result = temp_str.substring(pre_temp_index + 1, temp_index);
+                }
+                switch (result.charAt(0)) {
+                    case '0':
+                        data_type = data_class.temperature;
+                        break;
+                    case '1':
+                        data_type = data_class.heartrate;
+                        break;
+                    case '2':
+                        data_type = data_class.force;
+                        break;
+                    case '3':
+                        data_type = data_class.accelerator;
+                        break;
+                    case '4':
+                        data_type = data_class.gyro;
+                        break;
+                }
+                switch (data_type) {
+                    case temperature:
+                        prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(0));
+                        my_helper.temperatureAdd(my_userid, jsonArray.getDouble(0));
+                        break;
+                    case accelerator:
+                        prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(1));
+                        my_helper.acceleratorAdd(my_userid, jsonArray.getDouble(0), jsonArray.getDouble(1), jsonArray.getDouble(2));
+                        for (int i = 6; i < 9; i++) {
+                            data_to_foot_language[i] = jsonArray.getDouble(i - 6);
+                        }
+                        break;
+                    case gyro:
+                        prepareDataDouble(result.substring(1), jsonArray, force_tuple.get(2));
+                        my_helper.gyroAdd(my_userid, jsonArray.getDouble(0), jsonArray.getDouble(1), jsonArray.getDouble(2), 0, 0, 0, 0);
+                        for (int i = 9; i < 15; i++) {
+                            data_to_foot_language[i] = jsonArray.getDouble(i - 8);
+                        }
+                        break;
+                    case force:
+                        prepareDataInt(result.substring(1), jsonArray, force_tuple.get(3));
+                        my_helper.forceAdd(my_userid, jsonArray.getInt(0), jsonArray.getInt(1), jsonArray.getInt(2), jsonArray.getInt(3), jsonArray.getInt(4), jsonArray.getInt(5));
+                        for (int i = 0; i < 6; i++) {
+                            data_to_foot_language[i] = jsonArray.getDouble(i); //√ó√Æ¬∫√≥√ì√É¬¥¬¶√Ä√≠¬π√Ω¬µ√Ñ√ä√Ω¬æ√ù√ñ¬±¬Ω√ì√ó√∑√é¬™√Å¬¶
+                        }
+                        break;
+                    case heartrate:
+                        prepareDataInt(result.substring(1), jsonArray, force_tuple.get(4));
+                        my_helper.heartrateAdd(my_userid, jsonArray.getInt(0));
+                        break;
+                }
+                pre_temp_index = temp_index;
+                temp_index = temp_str.indexOf('#', pre_temp_index + 1);
+                Log.e("riverfish", "test");
+            }
+        }catch (JSONException e){
+
+        }
+    }
+
+    private boolean checkDataValidation(String result){
+        int len = result.length();
+        if (len == 0 || result.charAt(0) < '0' || result.charAt(0) > '4') {
+            return false;
+        }
+        return true;
     }
 
     private void postDataToServer(List<JSONArray> force_tuple){
@@ -369,7 +440,7 @@ public class BluetoothActivity extends Activity {
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(edit_message.getWindowToken(), 0);
                 } else {
-                    Toast.makeText(my_context, "∑¢ÀÕƒ⁄»›≤ªƒ‹Œ™ø’", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(my_context, "ÂÜÖÂÆπ‰∏∫Á©∫", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -377,18 +448,20 @@ public class BluetoothActivity extends Activity {
         disconnect_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                my_read.setDisconnect_flag(true);
+                Intent get_back = new Intent(BluetoothActivity.this, ConnectActivity.class);
+                startActivity(get_back);
             }
         });
     }
 
     private void sendMessage(String msg) {
-        if(my_bluetooth_socket == null){
-            Toast.makeText(my_context, "Œ¥¡¨Ω”", Toast.LENGTH_SHORT).show();
+        if(app.my_bluetooth_socket == null){
+            Toast.makeText(my_context, "√é¬¥√Å¬¨¬Ω√ì", Toast.LENGTH_SHORT).show();
             return;
         }
         try{
-            OutputStream os = my_bluetooth_socket.getOutputStream();
+            OutputStream os = app.my_bluetooth_socket.getOutputStream();
             os.write(msg.getBytes());
         }
         catch (IOException e){
@@ -436,7 +509,7 @@ public class BluetoothActivity extends Activity {
                                 force_data[i][j] = force_matrix.getJSONArray(i).getDouble(j);
                             }
                         }
-                        //force_data «“—”–µƒ25*75µƒæÿ’Û£¨‘⁄’‚¿Ô≤Â»Îª≠Õº∫Ø ˝ªÚª≠Õº¥˙¬Î
+                        //force_data√ä√á√í√ë√ì√ê¬µ√Ñ25*75¬µ√Ñ¬æ√ò√ï√≥¬£¬¨√î√ö√ï√¢√Ä√Ø¬≤√•√à√´¬ª¬≠√ç¬º¬∫¬Ø√ä√Ω¬ª√≤¬ª¬≠√ç¬º¬¥√∫√Ç√´
                     } catch (JSONException e) {
 
                     }
@@ -464,7 +537,11 @@ public class BluetoothActivity extends Activity {
         @Override
         public void handleMessage(Message msg) {
             Bundle b = msg.getData();
-            if(b.getBoolean("state")){
+            if(!b.getBoolean("connect")){
+                Intent get_back = new Intent(BluetoothActivity.this, ConnectActivity.class);
+                startActivity(get_back);
+            }
+            if(b.getBoolean("reconnenct")){
                 my_client = new clientThread(controlHandler);
                 my_client.start();
             }

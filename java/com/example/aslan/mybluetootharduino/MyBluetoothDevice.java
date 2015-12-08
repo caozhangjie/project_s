@@ -1,4 +1,4 @@
-package com.example.aslan.project_s;
+package com.example.aslan.mybluetootharduino;
 
 /**
  * Created by caozj on 15/7/18.

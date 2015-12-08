@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="planets_array">
+        <item>      </item>
+        <item>Personal Info</item>
+        <item>To Catch Data</item>
+        <item>To See Result</item>
+        <item>To Map here</item>
+        <item>To Log out</item>
+    </string-array>
+</resources>

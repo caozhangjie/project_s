@@ -1,4 +1,4 @@
-package com.example.aslan.project_s;
+package com.example.aslan.mybluetootharduino;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -31,7 +31,7 @@ public class MyFile extends ContextWrapper{
         output_is_open = false;
     }
 
-    //¹¹Ôìº¯Êı£¬Ö¸¶¨µ±Ç°ÉÏÏÂÎÄ£¬ÎÄ¼şÃûºÍÎÄ¼şÄ¿Â¼Ãû
+    //æ„é€ å‡½æ•°ï¼ŒæŒ‡å®šå½“å‰ä¸Šä¸‹æ–‡ï¼Œæ–‡ä»¶åå’Œæ–‡ä»¶ç›®å½•å
     public MyFile(Context context, String temp_file_name, String temp_directory_name){
         super(context);
         file_name = temp_file_name;
@@ -51,7 +51,11 @@ public class MyFile extends ContextWrapper{
 
     public void openExternalPrivateFileForWrite(boolean is_append) {
         file = new File(getExternalFilesDir(directory_name), file_name);
+
         try {
+            if (!file.exists()){
+                file.createNewFile();
+            }
             os = new FileOutputStream(file, is_append);
             if(file.exists())
             {
@@ -64,10 +68,12 @@ public class MyFile extends ContextWrapper{
         } catch (FileNotFoundException e) {
             output_is_open = false;
             e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    //´ò¿ªÎÄ¼şÀ´¶Á£¬ÎÄ¼şÃûÒÑÖ¸¶¨
+    //æ‰“å¼€æ–‡ä»¶æ¥è¯»ï¼Œæ–‡ä»¶åå·²æŒ‡å®š
     public void openExternalPrivateFileForRead() {
         file = new File(getExternalFilesDir(directory_name), file_name);
         if(file.exists()) {
@@ -99,7 +105,7 @@ public class MyFile extends ContextWrapper{
         return true;
     }
 
-    //´ÓÄ³ÎÄ¼şÖĞ¶ÁÈ¡offsetÎ»ÖÃ¿ªÊ¼¶Ábytecount¸öbyteµ½data
+    //ä»æŸæ–‡ä»¶ä¸­è¯»å–offsetä½ç½®å¼€å§‹è¯»bytecountä¸ªbyteåˆ°data
     public boolean readDatafromFile(byte [] data, int offset, int bytecount){
         try{
             if(input_is_open) {

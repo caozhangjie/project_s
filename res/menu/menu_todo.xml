@@ -1,7 +1,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.aslan.mybluetootharduino.ShowActivity">
+    tools:context="com.example.aslan.mybluetootharduino.TodoActivity">
+
+    <item android:id="@+id/action_websearch" android:title="search"
+
+
+        android:icon="@drawable/icon_markb"
+
+        app:showAsAction="ifRoom"
+
+        android:actionViewClass="android.widget.SearchView" />
+
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
 </menu>

@@ -1,4 +1,4 @@
-package com.example.aslan.project_s;
+package com.example.aslan.mybluetootharduino;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -43,9 +43,9 @@ public class GetThread extends Thread {
     public void run(){
 
         try {
-            //创建请求并设置属性
+            //麓麓陆篓脟毛脟贸虏垄脡猫脰脙脢么脨脭
             HttpGet my_get = new HttpGet(urlstr);
-            //创建客户端并执行请求
+            //麓麓陆篓驴脥禄搂露脣虏垄脰麓脨脨脟毛脟贸
             HttpClient client = new DefaultHttpClient();
             HttpResponse response = client.execute(my_get);
             HttpEntity response_entity = response.getEntity();

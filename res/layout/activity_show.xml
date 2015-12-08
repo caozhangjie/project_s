@@ -4,12 +4,13 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.example.aslan.ui.Show">
+    tools:context="com.example.aslan.mybluetootharduino.ShowActivity">
 
     <SurfaceView
-        android:layout_width="fill_parent"
-        android:layout_height="1400px"
+        android:layout_width="360px"
+        android:layout_height="1080px"
         android:id="@+id/surfaceView"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

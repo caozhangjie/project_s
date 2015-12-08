@@ -1,9 +1,11 @@
-package com.example.aslan.project_s;
+package com.example.aslan.mybluetootharduino;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,16 +26,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 
 public class ConnectActivity extends Activity implements OnItemClickListener {
@@ -45,6 +45,7 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
     private data_class data_type;
 
     Context this_context;
+    private BluetoothDevice my_bluetooth_device;
     private static final int REQUEST_ENABLED = 1;
     private BluetoothAdapter my_bluetooth_adapter = null;
     private List<String> device_list = new ArrayList<String>();
@@ -62,14 +63,17 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
     TimerTask timerTask;
     private int userid;
     private netDataHandler getHandler;
+    private ProgressDialog progressDialog;
+    private netResult app;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         this_context = this;
+        userid = ((netResult) getApplication()).getUserid();
+        app = (netResult) getApplication();
         super.onCreate(savedInstanceState);
         urlstr = getString(R.string.url_address);
-        userid = ((netResult) getApplication()).getUserid();
         getHandler = new netDataHandler();
         setContentView(R.layout.activity_connect);
         setView();
@@ -77,7 +81,6 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
     }
 
     private void setView(){
-        Log.e("22222222","22222222");
         device_list_view = (ListView)findViewById(R.id.device_list);
         list_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, device_list);
         device_list_view.setAdapter(list_adapter);
@@ -87,86 +90,6 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
         net_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*String res = new String();
-                switch (data_type){
-                    case temperature:
-                        res = "temperature";
-                        break;
-                    case force:
-                        res = "force";
-                        break;
-                    case accelerator:
-                        res = "accelerator";
-                        break;
-                    case gyro:
-                        res = "gyro";
-                        break;
-                    case heartrate:
-                        res = "heartrate";
-                        break;
-                }
-                /*List<BasicNameValuePair> request_list = new ArrayList<BasicNameValuePair>();
-                JSONObject jsonObject = new JSONObject();
-                JSONArray jsonArray = new JSONArray();
-                try {
-                    JSONObject userid = new JSONObject();
-                    userid.put("userid", 1);
-                    jsonArray.put(7.8);
-                    jsonArray.put(38.6);
-                    jsonObject.put("temp", jsonArray);
-                    jsonObject.put("userinfo", userid);
-                } catch (JSONException e) {
-                    Log.e("error", e.toString());
-                    e.printStackTrace();
-                }
-                request_list.add(new BasicNameValuePair("temperature", jsonObject.toString()));
-                post_thread = new PostThread(this_context, "http://59.66.138.22:5000/save/temperature", request_list, (netResult)getApplication());
-                post_thread.start();
-                while (true)
-                {
-
-                    if(((netResult) getApplication()).isPost_finish()){
-                        Log.e("result: ", ((netResult) getApplication()).getPost_result());
-                        break;
-                    }
-                }*/
-                /*List<BasicNameValuePair> request_list = new ArrayList<BasicNameValuePair>();
-                request_list.add(new BasicNameValuePair("username", "jianghaochen"));
-                request_list.add(new BasicNameValuePair("password", "jianghaochen"));
-
-                post_thread = new PostThread(this_context, "http://101.5.218.227:5000/register", request_list, (netResult) getApplication());
-                post_thread.start();
-                get_thread = new GetThread(this_context, String.format("%s/get/%s/3", urlstr, res), (netResult) getApplication(), getHandler, BluetoothActivity.function.depict_heat_map);
-                ((netResult) getApplication()).setGet_finish(false);
-                get_thread.start();
-                while (true) {
-                    if (((netResult) getApplication()).isGet_finish()) {
-                        break;
-                    }
-                }
-                JSONObject resu;
-                JSONArray arr = null;
-                try {
-                    resu = new JSONObject(((netResult) getApplication()).getGet_result());
-                    arr = resu.getJSONArray(String.format("%s_list", res));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                int len = arr.length();
-                int count = 0;
-                int time = 0;
-                while(count < len){
-                    if(time == 0){
-                        try {
-                            Log.e("error", arr.getString(count));
-                            count ++;
-                            time ++;
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }*/
-                Log.e("show","1");
                 try{
                     Intent show = new Intent(ConnectActivity.this, ShowActivity.class);
                     startActivity(show);
@@ -281,6 +204,20 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
         return super.onOptionsItemSelected(item);
     }
 
+    private Handler progressdialog_handler = new Handler(){
+
+        @Override
+        public void handleMessage(Message msg) {
+
+            //关闭ProgressDialog
+            progressDialog.dismiss();
+
+            //更新UI
+            if (msg.what == 1) Toast.makeText(this_context,"获取设备失败",Toast.LENGTH_LONG).show();
+            if (msg.what == 2) Toast.makeText(this_context,"连接失败",Toast.LENGTH_LONG).show();
+            if (msg.what == 3) Toast.makeText(this_context,"连接成功",Toast.LENGTH_LONG).show();
+        }};
+
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
         final String device = device_list.get(pos);
@@ -289,25 +226,73 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
             button_search.setText(R.string.start_search);
         }
         if(device != null) {
-            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-            dialog.setTitle("Comfirmed connection");
-            dialog.setMessage(device);
-            dialog.setPositiveButton("connect",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            MyBluetoothDevice.bluetooth_Mac = device.substring(device.length() - 17);
-                            Intent transfer = new Intent(ConnectActivity.this, BluetoothActivity.class);
-                            startActivity(transfer);
-                        }
-                    });
+            /*AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setTitle("Connecting");
+            dialog.setMessage("Is connecting to the device now");
             dialog.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    MyBluetoothDevice.bluetooth_Mac = null;
+                    if(my_bluetooth_socket != null && !my_bluetooth_socket.isConnected()){
+                        try {
+                            my_bluetooth_socket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             });
-            dialog.show();
+            dialog.show();*/
+
+            progressDialog = new ProgressDialog(ConnectActivity.this);
+            progressDialog.setTitle("Connecting");
+            progressDialog.setMessage(device);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.show();
+            Log.e("progress","dialog");
+            new Thread(){
+
+                @Override
+                public void run() {
+                    Message msg = new Message();
+                    MyBluetoothDevice.bluetooth_Mac = device.substring(device.length() - 17);
+                    boolean flag_success = false;
+                    my_bluetooth_device = my_bluetooth_adapter.getRemoteDevice(MyBluetoothDevice.bluetooth_Mac);
+                    try {
+                        app.my_bluetooth_socket = my_bluetooth_device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+                        flag_success = true;
+                    } catch (IOException e) {
+
+                        msg.what = 1;
+                        progressdialog_handler.sendMessage(msg);
+                /*dialog.setTitle("获取设备失败");
+                dialog.show();*/
+                        e.printStackTrace();
+                        return;
+                    }
+                    if (flag_success) {
+                        try {
+                            app.my_bluetooth_socket.connect();
+                        } catch (IOException e) {
+
+                    /*dialog.setTitle("连接失败");
+                    dialog.show();*/
+                            msg.what = 2;
+                            progressdialog_handler.sendMessage(msg);
+                            try {
+                                app.my_bluetooth_socket.close();
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                            }
+                            e.printStackTrace();
+                            return;
+                        }
+                        msg.what = 3;
+                        progressdialog_handler.sendMessage(msg);
+                        Intent Bluetooth_intent = new Intent(ConnectActivity.this, BluetoothActivity.class);
+                        startActivity(Bluetooth_intent);
+                    }
+                }}.start();
+
         }
     }
 
@@ -339,7 +324,7 @@ public class ConnectActivity extends Activity implements OnItemClickListener {
         public void handleMessage(Message msg) {
             Bundle b = msg.getData();
             if(b.getBoolean("state")){
-                //�յ����������ݣ����в���
+                //ÊÕµ½ÁËÍøÂçÊý¾Ý£¬½øÐÐ²Ù×÷
             }
             super.handleMessage(msg);
         }
